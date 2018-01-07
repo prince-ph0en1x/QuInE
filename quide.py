@@ -3,31 +3,25 @@
 
 import sys
 from PyQt4 import QtGui, QtCore
+import os
 
 class Window(QtGui.QMainWindow):
     
     win_ry = 900
     win_cx = 1600
-
     saved = 0
-
-    fileOpenql = ""
+    fileOpenql = "tmpO.py"
+    fileQasm = "tmp0.qasm"
 
     def __init__(self):
 
         super(Window,self).__init__()
         self.setGeometry(150,50,self.win_cx,self.win_ry)
         self.setWindowTitle("Quantum Integrated Development Environment")
-        self.setWindowIcon(QtGui.QIcon('icons/a.png'))
-        
+        self.setWindowIcon(QtGui.QIcon('icons/app.png'))
         self.statusBar()
         self.menu()             # Menu Bar
         self.quickaccess()      # Quick Access
-        
-        self.topWidget = QtGui.QWidget(self)
-        self.setCentralWidget(self.topWidget)
-        self.topLayout = QtGui.QGridLayout(self.topWidget)
-
         self.gateset()          # Tool Box
         self.sandbox()          # Sandbox
         self.show()
@@ -171,13 +165,13 @@ class Window(QtGui.QMainWindow):
 
     def gateset(self):
         
-        gsr = 40
-        gsc = 15
-
-        gSet = 1
         gsz = 40
         bsz = gsz - 0
+        
+        gsr = self.win_ry/2 + gsz/2 - 8
+        gsc = self.win_cx - 3*gsz - 380
 
+        
         gateNames = ("X","Y","Z","H","S","T","Rx","Ry","Rz","CX","CZ","Tf")
         self.btn_g = {}
         self.gateSets = ("All","Universal {H, Tf}","Universal {1Qb, CX}")
@@ -236,43 +230,98 @@ class Window(QtGui.QMainWindow):
         fontColor = QtGui.QAction('bg color',self)
         fontColor.triggered.connect(self.color_picker)
         self.toolBar.addAction(fontColor)
+
+        self.toolBar.addSeparator()
+
+        execO = QtGui.QAction(QtGui.QIcon('icons/o.png'),'execute openql',self)
+        execO.triggered.connect(self.execOpenQL)
+        self.toolBar.addAction(execO)
+
+        execQ = QtGui.QAction(QtGui.QIcon('icons/q.png'),'execute qasm',self)
+        execQ.triggered.connect(self.execQasm)
+        self.toolBar.addAction(execQ)
+
+        execC = QtGui.QAction(QtGui.QIcon('icons/c.png'),'execute circuit',self)
+        execC.triggered.connect(self.TBD)
+        self.toolBar.addAction(execC)
     
     def openqlEditor(self):
 
         self.textOpenql = QtGui.QTextEdit(self)
-        self.textOpenql.setFixedSize(600,400)
+        self.textOpenql.setFixedSize(self.win_cx/2-14,400)
         self.textOpenql.setText("OpenQL Editor")
-        self.topLayout.addWidget(self.textOpenql,0,1,1,1)
+        self.textOpenql.setLineWrapMode(0)
+        self.topLayoutH1.addWidget(self.textOpenql,0,QtCore.Qt.AlignLeft)
         
     def qasmEditor(self):
 
         self.textQasm = QtGui.QTextEdit(self)
-        self.textQasm.setFixedSize(600,400)
+        self.textQasm.setFixedSize(self.win_cx/2-14,400)
         self.textQasm.setText("QASM Editor")
-        self.topLayout.addWidget(self.textQasm,1,1,1,1)
-        # layout.setAlignment(dummy1,QtCore.Qt.AlignRight)
-        
+        self.textQasm.setLineWrapMode(0)
+        self.topLayoutH1.addWidget(self.textQasm,0,QtCore.Qt.AlignRight)
+
+    def circuitEditor(self):
+
+        self.circuit = QtGui.QTextEdit(self)
+        self.circuit.setFixedSize(1000,400)
+        self.circuit.setText("Circuit Editor")
+        self.topLayoutH2.addWidget(self.circuit,0,QtCore.Qt.AlignLeft)
+        # self.topLayoutH2.addSpacing(100)
+
+    def layoutEditor(self):
+
+        self.qclayout = QtGui.QTextEdit(self)
+        self.qclayout.setFixedSize(400,400)
+        self.qclayout.setText("Layout Editor")
+        self.topLayoutH2.addWidget(self.qclayout,0,QtCore.Qt.AlignRight)
+
     def sandbox(self):
 
         action = 0
 
         # Default View
+
+        self.centralWidget = QtGui.QWidget(self)
+        self.setCentralWidget(self.centralWidget)
+        
+        self.topLayoutV = QtGui.QVBoxLayout(self.centralWidget)
+        
+        self.topLayoutH1 = QtGui.QHBoxLayout()
         self.openqlEditor()
         self.qasmEditor()
+        self.topLayoutV.addLayout(self.topLayoutH1,QtCore.Qt.AlignBottom)
+        
+        self.topLayoutH2 = QtGui.QHBoxLayout()   
+        self.circuitEditor()
+        self.layoutEditor()     
+        self.topLayoutV.addLayout(self.topLayoutH2,QtCore.Qt.AlignBottom)
 
-        self.textQasm = QtGui.QTextEdit(self)
-        self.textQasm.setFixedSize(1000,400)
-        self.topLayout.addWidget(self.textQasm,1,0,1,1)
+        
+    def execQasm(self):
 
+        file = open(self.fileQasm,'w')
+        text = self.textQasm.toPlainText()
+        file.write(text)
+        file.close()
+        os.system("./qx_simulator_1.0.beta_linux_x86_64 "+str(self.fileQasm)+" > tmpG.txt")
+        #plot output
+        #generate openql and circuit
+        
+    def execOpenQL(self):
 
-        # self.btn11 = QtGui.QPushButton("BtnWgt",self)
-        # self.btn11.clicked.connect(self.close_app)
-        # self.btn11.setFixedSize(30,30)
-        # # self.btn11.setVisible(False)
-        # # self.btn11.setEnabled(False)
-        # self.topLayout.addWidget(self.btn11,0,0,1,1)
+        file = open(self.fileOpenql,'w')
+        text = self.textOpenql.toPlainText()
+        file.write(text)
+        file.close()
+        os.system("python3 "+"tmpO.py")    # arbitratry file name
+        # change qasm & circuit
 
-
+        name = "test_output/qg.qasm"
+        file = open(name,'r')
+        with file:
+            text = file.read()
+            self.textQasm.setText(text)
 
     def close_app(self):
         if self.saved == 0:
@@ -285,17 +334,17 @@ class Window(QtGui.QMainWindow):
 
     def open_openql(self):
 
-        name = QtGui.QFileDialog.getOpenFileName(self,'Open File')
-        self.fileOpenql = name
-        file = open(name,'r')
+        self.fileOpenql = QtGui.QFileDialog.getOpenFileName(self,'Open File')
+        file = open(self.fileOpenql,'r')
         with file:
             text = file.read()
             self.textOpenql.setText(text)
+        # highlight = syntax.PythonHighlighter(editor.document())
             
     def open_qasm(self):
 
-        name = QtGui.QFileDialog.getOpenFileName(self,'Open File')
-        file = open(name,'r')
+        self.fileQasm = QtGui.QFileDialog.getOpenFileName(self,'Open File')
+        file = open(self.fileQasm,'r')
         with file:
             text = file.read()
             self.textQasm.setText(text)
@@ -335,19 +384,8 @@ sys.exit(app.exec_())
 ## TODOS
 
 '''
-
 * Allow Topology Definition
-* Real time qasm and openql rendering and viceversa
 * Save circuit as functional blocks
 * Autouncompute
 * Statistical graphs
-* Toolset of universal gate set
-* Style COnfiguration file
-
 '''
-
-# checkbox v8
-# progress bar
-# fonts v11
-# colour v12
-# calender v12
