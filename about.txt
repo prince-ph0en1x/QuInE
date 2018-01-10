@@ -1,0 +1,5 @@
+This is a project developed by Aritra Sarkar to integrate OpenQL and QX-Sim into a single integrated development environment.
+
+For suggestions and bug reports, use the GitLab page at:
+
+https://gitlab.com/prince-ph0en1x/QIDE

@@ -1,3 +1,5 @@
+# \author: Aritra Sarkar
+
 #   cd /mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QIDE/
 #   python quide.py
 
@@ -5,10 +7,10 @@ import sys
 from PyQt4 import QtGui, QtCore
 import os
 import re
-# import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+import syntax
 
 class Window(QtGui.QMainWindow):
     
@@ -20,6 +22,9 @@ class Window(QtGui.QMainWindow):
     
     circTick = 0
     gateNames = ("X","Y","Z","H","S","T","Rx","Ry","Rz","CX","CZ","Tf")
+    gateCodes = ("x","y","z","h","s","t","rx","ry","rz","cnot","cphase","toffoli")
+    drawGateQ = []
+    drawMaxQ = 0
         
     def __init__(self):
 
@@ -27,18 +32,19 @@ class Window(QtGui.QMainWindow):
         self.setGeometry(150,50,self.win_cx,self.win_ry)
         self.setWindowTitle("Quantum Integrated Development Environment")
         self.setWindowIcon(QtGui.QIcon('icons/app.png'))
+        # self.QtGui.QMainWindow.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.WindowMinimizeButtonHint)
         self.statusBar()
         self.menu()             # Menu Bar
         self.quickaccess()      # Quick Access
         self.sandbox()          # Sandbox
-        self.gateset()          # Tool Box
         self.show()
     
     def menu(self):
 
         mainMenu = self.menuBar()
         menuFile = mainMenu.addMenu('&File')
-        menu_edit = mainMenu.addMenu('&Edit')
+        menuEdit = mainMenu.addMenu('&Edit')
+        menuEdit.setEnabled(False)
         menuView = mainMenu.addMenu('&View')
         menuHelp = mainMenu.addMenu('&Help')
         
@@ -49,6 +55,7 @@ class Window(QtGui.QMainWindow):
         extractAction.setStatusTip('new project')
         extractAction.triggered.connect(self.TBD)
         menuFile.addAction(extractAction)
+        extractAction.setEnabled(False)
         
         menuFile.addSeparator()
         
@@ -56,6 +63,7 @@ class Window(QtGui.QMainWindow):
         extractAction.setStatusTip('open existing project')
         extractAction.triggered.connect(self.TBD)
         menuFile.addAction(extractAction)
+        extractAction.setEnabled(False)
 
         extractAction = QtGui.QAction("&Open OpenQL",self)
         extractAction.setStatusTip('open exiting openql')
@@ -74,6 +82,7 @@ class Window(QtGui.QMainWindow):
         extractAction.setStatusTip('save')
         extractAction.triggered.connect(self.TBD)
         menuFile.addAction(extractAction)
+        extractAction.setEnabled(False)
         
         extractAction = QtGui.QAction("&Export Qasm",self)
         extractAction.setStatusTip('export current circuit as qasm')
@@ -99,16 +108,7 @@ class Window(QtGui.QMainWindow):
         extractAction.setStatusTip('show toolbar')
         extractAction.triggered.connect(self.quickaccess)
         menuView.addAction(extractAction)
-
-        # extractAction = QtGui.QAction("&Show OpenQL Editor",self)
-        # extractAction.setStatusTip('show openql editor')
-        # extractAction.triggered.connect(self.openqlEditor)
-        # menuView.addAction(extractAction)
-        
-        # extractAction = QtGui.QAction("&Show QASM Editor",self)
-        # extractAction.setStatusTip('show qasm editor')
-        # extractAction.triggered.connect(self.qasmEditor)
-        # menuView.addAction(extractAction)
+        extractAction.setEnabled(False)
         
         menuView.addSeparator()
         
@@ -146,29 +146,33 @@ class Window(QtGui.QMainWindow):
         extractAction.setStatusTip('enter tutorial mode')
         extractAction.triggered.connect(self.TBD)
         menuHelp.addAction(extractAction)
-        
+        extractAction.setEnabled(False)
+
         extractAction = QtGui.QAction("&Documentation",self)
         extractAction.setStatusTip('view documentation')
         extractAction.triggered.connect(self.TBD)
         menuHelp.addAction(extractAction)
-        
+        extractAction.setEnabled(False)
+
         menuHelp.addSeparator()
         
         extractAction = QtGui.QAction("&Release Notes",self)
         extractAction.setStatusTip('view release notes')
         extractAction.triggered.connect(self.TBD)
         menuHelp.addAction(extractAction)
+        extractAction.setEnabled(False)
         
         extractAction = QtGui.QAction("&Update",self)
         extractAction.setStatusTip('check for updates')
         extractAction.triggered.connect(self.TBD)
         menuHelp.addAction(extractAction)
+        extractAction.setEnabled(False)
         
         menuHelp.addSeparator()
         
         extractAction = QtGui.QAction("&License",self)
         extractAction.setStatusTip('view license')
-        extractAction.triggered.connect(self.TBD)
+        extractAction.triggered.connect(self.license)
         menuHelp.addAction(extractAction)
         
         extractAction = QtGui.QAction("&About",self)
@@ -178,37 +182,97 @@ class Window(QtGui.QMainWindow):
 
     def gateset(self):
         
-        # make in layout
         gsz = 40
         bsz = gsz - 0
-        
         gsr = self.win_ry/2 + gsz/2 + 5
-        gsc = 10 #self.win_cx - 3*gsz - 380
-
-        
+        gsc = 10 #self.win_cx - 3*gsz - 380 
         self.btn_g = {}
         self.gateSets = ("All","Universal {H, Tf}","Universal {1Qb, CX}")
         self.gateMasks = ("111111111111","000100000001","111111000100")
-
+        self.btnLayoutGates = QtGui.QGridLayout()
         comboBox = QtGui.QComboBox(self)
         for gs in range(0,len(self.gateSets)):
             comboBox.addItem(self.gateSets[gs])      
-        comboBox.move(gsc,gsr)
-        comboBox.resize(2*gsz,gsz)
+        comboBox.setFixedSize(2*gsz+5,gsz)
         comboBox.activated[str].connect(self.gateEnbl)
+        self.btnLayoutGates.addWidget(comboBox,0,0,1,2,QtCore.Qt.AlignTop)
         gsr = gsr+gsz  
         gr = 0
         gc = 0
         gates = len(self.gateNames)
         for g in range(0,gates):
             self.btn_g[g] = QtGui.QPushButton(self.gateNames[g],self)
-            self.btn_g[g].clicked.connect(self.TBD)
-            self.btn_g[g].resize(bsz,bsz)
-            self.btn_g[g].move(gsc+gc*gsz,gsr+gr*gsz)
+            self.btn_g[g].setFixedSize(bsz,bsz)
+            self.btnLayoutGates.addWidget(self.btn_g[g],g/2+1,g%2,QtCore.Qt.AlignTop)
             gc = (gc + 1)%2
             if gc == 0:
                 gr = gr + 1
+        self.btn_g[0].clicked.connect(lambda: self.circSelGate(0))
+        self.btn_g[1].clicked.connect(lambda: self.circSelGate(1))
+        self.btn_g[2].clicked.connect(lambda: self.circSelGate(2))
+        self.btn_g[3].clicked.connect(lambda: self.circSelGate(3))
+        self.btn_g[4].clicked.connect(lambda: self.circSelGate(4))
+        self.btn_g[5].clicked.connect(lambda: self.circSelGate(5))
+        self.btn_g[6].clicked.connect(lambda: self.circSelGate(6))
+        self.btn_g[7].clicked.connect(lambda: self.circSelGate(7))
+        self.btn_g[8].clicked.connect(lambda: self.circSelGate(8))
+        self.btn_g[9].clicked.connect(lambda: self.circSelGate(9))
+        self.btn_g[10].clicked.connect(lambda: self.circSelGate(10))
+        self.btn_g[11].clicked.connect(lambda: self.circSelGate(11))
+        
+        self.topLayoutH2.addLayout(self.btnLayoutGates,QtCore.Qt.AlignLeft)
     
+    def circSelGate(self,gateId):
+
+        self.drawGate = gateId
+        self.drawGateQ = []
+        # self.circuit.setDragMode(QtGui.QGraphicsView.NoDrag)
+    
+    def pixelSelect(self, event):
+
+        # undo/redo gate button
+        # drag toggle button
+        # make new kernel button
+        # make new unitary button
+        # insert custom kernel/unitary button
+
+        name = "testC2G.qasm"
+        file = open(name,'a')      
+
+        ysp = 40
+        qb = event.pos().y()/ysp
+        self.drawGateQ.append(qb)
+        if self.drawGate < 9:
+            if len(self.drawGateQ) == 1:
+                self.circGate(self.drawGate,self.drawGateQ)
+                file.write(self.gateCodes[self.drawGate]+" q"+str(self.drawGateQ[0])+"\n")
+                if qb+1 > self.drawMaxQ:
+                    self.drawMaxQ = qb+1
+        elif self.drawGate == 9:
+            if len(self.drawGateQ) == 2:
+                self.circGate(self.drawGate,self.drawGateQ)
+                file.write(self.gateCodes[self.drawGate]+" q"+str(self.drawGateQ[0])+",q"+str(self.drawGateQ[1])+"\n")
+                if qb+1 > self.drawMaxQ:
+                    self.drawMaxQ = qb+1
+        elif self.drawGate == 11:
+            if len(self.drawGateQ) == 3:
+                self.circGate(self.drawGate,self.drawGateQ)
+                file.write(self.gateCodes[self.drawGate]+" q"+str(self.drawGateQ[0])+",q"+str(self.drawGateQ[1])+",q"+str(self.drawGateQ[2])+"\n")
+                if qb+1 > self.drawMaxQ:
+                    self.drawMaxQ = qb+1
+
+        file.close()
+
+    def execCirc(self):
+
+        file = open("testC2G.qasm",'r+')
+        content = file.read()+"display"
+        file.seek(0, 0)
+        file.write("qubits "+str(self.drawMaxQ)+"\n" + content)
+        file.close()
+        os.system("./qx_simulator_1.0.beta_linux_x86_64 "+str("testC2G.qasm")+" > tmpCG.txt")
+        self.plotOutput()
+
     def gateEnbl(self,set):
 
         gs = 0
@@ -260,11 +324,14 @@ class Window(QtGui.QMainWindow):
     
     def codeEditors(self):
 
+        self.topLayoutH1.addSpacing(90) 
+        
         self.textOpenql = QtGui.QTextEdit(self)
-        self.textOpenql.setFixedSize(self.win_cx/2-30,400)
+        self.textOpenql.setFixedSize(990,415)
         self.textOpenql.setText("OpenQL Editor")
         self.textOpenql.setLineWrapMode(0)
-        self.topLayoutH1.addWidget(self.textOpenql,0,QtCore.Qt.AlignLeft)
+        self.highlight = syntax.PythonHighlighter(self.textOpenql.document())
+        self.topLayoutH1.addWidget(self.textOpenql,QtCore.Qt.AlignRight)
 
         self.btnLayoutOQ = QtGui.QVBoxLayout()
         
@@ -273,17 +340,20 @@ class Window(QtGui.QMainWindow):
         self.btnO2Q.setFixedSize(30,30)
         self.btnLayoutOQ.addWidget(self.btnO2Q,0,QtCore.Qt.AlignBottom)
 
-        self.btnO2Q = QtGui.QPushButton(u"\u2190",self)
-        self.btnO2Q.clicked.connect(self.TBD)
-        self.btnO2Q.setFixedSize(30,30)
-        self.btnLayoutOQ.addWidget(self.btnO2Q,0,QtCore.Qt.AlignTop)
+        self.btnQ2O = QtGui.QPushButton(u"\u2190",self)
+        self.btnQ2O.clicked.connect(self.TBD)
+        self.btnQ2O.setFixedSize(30,30)
+        self.btnLayoutOQ.addWidget(self.btnQ2O,QtCore.Qt.AlignBottom)
+        self.btnQ2O.setEnabled(False)
+
+        self.btnLayoutOQ.addSpacing(40) 
 
         self.topLayoutH1.addLayout(self.btnLayoutOQ,QtCore.Qt.AlignCenter)
 
         self.qasmLayout = QtGui.QVBoxLayout()
         
         self.textQasm = QtGui.QTextEdit(self)
-        self.textQasm.setFixedSize(self.win_cx/2-30,380)
+        self.textQasm.setFixedSize(460,380)    # self.win_cx/2-30
         self.textQasm.setText("QASM Editor")
         self.textQasm.setLineWrapMode(0)
         self.qasmLayout.addWidget(self.textQasm,0,QtCore.Qt.AlignRight)
@@ -293,13 +363,16 @@ class Window(QtGui.QMainWindow):
         self.btnQ2C = QtGui.QPushButton(u"\u2193",self)
         self.btnQ2C.clicked.connect(self.convQ2C)
         self.btnQ2C.setFixedSize(30,30)
-        self.btnLayoutQ.addWidget(self.btnQ2C,0,QtCore.Qt.AlignRight)
+        self.btnLayoutQ.addWidget(self.btnQ2C,QtCore.Qt.AlignLeft)
         
         self.btnC2Q = QtGui.QPushButton(u"\u2191",self)
         self.btnC2Q.clicked.connect(self.TBD)
         self.btnC2Q.setFixedSize(30,30)
-        self.btnLayoutQ.addWidget(self.btnC2Q,0,QtCore.Qt.AlignLeft)
+        self.btnLayoutQ.addWidget(self.btnC2Q,QtCore.Qt.AlignLeft)
+        self.btnC2Q.setEnabled(False)
         
+        self.btnLayoutQ.addSpacing(40) 
+
         self.btnQ2G = QtGui.QPushButton(u"\u2193",self)
         self.btnQ2G.clicked.connect(self.plotOutput)
         self.btnQ2G.setFixedSize(30,30)
@@ -322,20 +395,15 @@ class Window(QtGui.QMainWindow):
 
         self.circuit = QtGui.QGraphicsView(self.qcircuit)
         self.circuit.setFixedSize(1100,400)
-        self.circuit.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-        # self.circuit.mousePressEvent = self.pixelSelect
-        self.btnLayoutC.addWidget(self.circuit,0,QtCore.Qt.AlignLeft)
+        self.circuit.mousePressEvent = self.pixelSelect
+        self.btnLayoutC.addWidget(self.circuit,QtCore.Qt.AlignLeft)
 
         self.btnC2G = QtGui.QPushButton(u"\u2192",self)
-        self.btnC2G.clicked.connect(self.TBD)
+        self.btnC2G.clicked.connect(self.execCirc)
         self.btnC2G.setFixedSize(30,30)
-        self.btnLayoutC.addWidget(self.btnC2G,0,QtCore.Qt.AlignRight)
-
+        self.btnLayoutC.addWidget(self.btnC2G,0,QtCore.Qt.AlignTop)
 
         self.topLayoutH2.addLayout(self.btnLayoutC,QtCore.Qt.AlignLeft)
-
-        # self.pixmap_item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap('topologies/surface17a.png').scaled(300,300), None, self.scene)
-        # self.pixmap_item.mousePressEvent = self.pixelSelect
 
     def layoutEditor(self):
 
@@ -363,11 +431,6 @@ class Window(QtGui.QMainWindow):
         self.qclayout.setFixedSize(tsz,tsz)
         self.pixmap_item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap('topologies/surface17a.png').scaled(tsz,tsz), None, self.scene1)
 
-        self.scene3 = QtGui.QGraphicsScene()
-        self.console = QtGui.QGraphicsView(self.scene3)
-        self.console.setFixedSize(tsz,tsz)
-        self.pixmap_item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap('icons/tbd.png').scaled(tsz,tsz), None, self.scene3)
-
         self.scene4 = QtGui.QGraphicsScene()
         self.showlog = QtGui.QGraphicsView(self.scene4)
         self.showlog.setFixedSize(tsz,tsz)
@@ -376,7 +439,6 @@ class Window(QtGui.QMainWindow):
         self.tabLayout = QtGui.QTabWidget(self)
         self.tabLayout.addTab(self.qcoutputw,"Output")
         self.tabLayout.addTab(self.qclayout,"Layout")
-        self.tabLayout.addTab(self.console,"Console")
         self.tabLayout.addTab(self.showlog,"Logs")
 
         self.topLayoutH2.addWidget(self.tabLayout,0,QtCore.Qt.AlignRight)
@@ -395,28 +457,7 @@ class Window(QtGui.QMainWindow):
         # self.pixmap_item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap('topologies/surface17a.png').scaled(300,300), None, self.scene)
         # self.pixmap_item.mousePressEvent = self.pixelSelect
 
-    def pixelSelect(self, event):
-
-        print("click me")
-        pointer = event.pos()
-        print(pointer.y())
-        return
-
-        # self.click_positions.append(event.pos())
-        # if len(self.click_positions) < 4:
-        #     self.click_positions = []
-        #     return
-        # pen = QtGui.QPen(QtCore.Qt.red)
-        # self.scene.addPolygon(QtGui.QPolygonF(self.click_positions), pen)
-        # for point in self.click_positions:
-        #     self.scene.addEllipse(point.x(), point.y(), 2, 2, pen)
-        # self.click_positions = []
-
     def sandbox(self):
-
-        action = 0
-
-        # Default View
 
         self.centralWidget = QtGui.QWidget(self)
         self.setCentralWidget(self.centralWidget)
@@ -427,8 +468,8 @@ class Window(QtGui.QMainWindow):
         self.codeEditors()
         self.topLayoutV.addLayout(self.topLayoutH1,QtCore.Qt.AlignBottom)
         
-        self.topLayoutH2 = QtGui.QHBoxLayout()  
-        self.topLayoutH2.addSpacing(90) 
+        self.topLayoutH2 = QtGui.QHBoxLayout()
+        self.gateset()
         self.circuitEditor()
         self.layoutEditor()     
         self.topLayoutV.addLayout(self.topLayoutH2,QtCore.Qt.AlignBottom)
@@ -517,6 +558,7 @@ class Window(QtGui.QMainWindow):
 
     def circReset(self):
 
+        os.remove("testC2G.qasm")
         for item in self.qcircuit.items():
             self.qcircuit.removeItem(item)
         pen = QtGui.QPen(QtCore.Qt.black)
@@ -543,21 +585,23 @@ class Window(QtGui.QMainWindow):
         rsz = 24
         csz = 14
         
-        qbt = qbset[0]
         if gateId < 9:
+            qbt = qbset[0]
             self.qcircuit.addRect(QtCore.QRectF(beg+xsp*self.circTick,ysp*qbt,rsz,rsz),penG,fill)
             t = self.qcircuit.addText(self.gateNames[gateId])
             t.setPos(beg+xsp*self.circTick+4,ysp*qbt)
         elif gateId == 9:
-            qbc1 = qbset[1]
+            qbc1 = qbset[0]
+            qbt = qbset[1]
             self.qcircuit.addLine(QtCore.QLineF(beg+xsp*self.circTick+5+7,ysp*qbc1+5+7,beg+xsp*self.circTick+12,ysp*qbt+12),penG)
             self.qcircuit.addEllipse(QtCore.QRectF(beg+xsp*self.circTick+(rsz-csz)/2,ysp*qbc1+(rsz-csz)/2,csz,csz),penG,QtCore.Qt.black)
             self.qcircuit.addRect(QtCore.QRectF(beg+xsp*self.circTick,ysp*qbt,rsz,rsz),penG,fill)
             t = self.qcircuit.addText("X")
             t.setPos(beg+xsp*self.circTick+4,ysp*qbt)
         elif gateId == 11:
+            qbc2 = qbset[0]
             qbc1 = qbset[1]
-            qbc2 = qbset[2]
+            qbt = qbset[2]
             self.qcircuit.addLine(QtCore.QLineF(beg+xsp*self.circTick+5+7,ysp*qbc1+5+7,beg+xsp*self.circTick+12,ysp*qbt+12),penG)
             self.qcircuit.addLine(QtCore.QLineF(beg+xsp*self.circTick+5+7,ysp*qbc2+5+7,beg+xsp*self.circTick+12,ysp*qbt+12),penG)
             self.qcircuit.addEllipse(QtCore.QRectF(beg+xsp*self.circTick+(rsz-csz)/2,ysp*qbc1+(rsz-csz)/2,csz,csz),penG,QtCore.Qt.black)
@@ -592,16 +636,15 @@ class Window(QtGui.QMainWindow):
             ptrn = re.compile("cnot"+'\sq(\d+),q(\d+)',re.IGNORECASE)
             mtch = ptrn.search(line)
             if mtch != None:
-                self.circGate(9,[int(mtch.group(2)),int(mtch.group(1))])
+                self.circGate(9,[int(mtch.group(1)),int(mtch.group(2))])
 
             # Three Qubit Gates
             ptrn = re.compile("toffoli"+'\sq(\d+),q(\d+),q(\d+)',re.IGNORECASE)
             mtch = ptrn.search(line)
             if mtch != None:
-                self.circGate(11,[int(mtch.group(3)),int(mtch.group(2)),int(mtch.group(1))])
+                self.circGate(11,[int(mtch.group(1)),int(mtch.group(2)),int(mtch.group(3))])
 
-        # self.circGate(0,[0])
-        # self.circGate(1,[2])
+        self.circuit.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
        
         return
 
@@ -646,11 +689,7 @@ class Window(QtGui.QMainWindow):
         with file:
             text = file.read()
             self.textQasm.setText(text)
-        
-    def about(self):
-        print(self.fileOpenql)
-        print("Alex")
-    
+
     def ins_gate(self):
 
         print("f")
@@ -661,6 +700,14 @@ class Window(QtGui.QMainWindow):
         self.penColor = color
         # self.styleChoice.setStyleSheet("QWidget { background-color: %s}" % color.name())
 
+    def license(self):
+
+        QtGui.QMessageBox.about(self,"License",open("license.txt",'r').read())
+
+    def about(self):
+
+        QtGui.QMessageBox.about(self,"About",open("about.txt",'r').read())
+
     def TBD(self):
 
         print("TBD")
@@ -669,11 +716,22 @@ app = QtGui.QApplication(sys.argv)
 GUI = Window()
 sys.exit(app.exec_())
 
-## TODOS
+## TODOs: FEATURES
 
 '''
 * Allow Topology Definition
 * Save circuit as functional blocks
 * Autouncompute
 * Statistical graphs
+'''
+
+## TODOs: UI
+
+'''
+* Save/Open Project
+* Disable TBD buttons
+* Change toolbox to Layout
+* Show/Hide Toolbar
+* Tab width in TextEdit
+* QASM syntax highlighting
 '''
