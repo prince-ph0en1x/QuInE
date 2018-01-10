@@ -11,8 +11,8 @@
   [released under Apache License 2.0 terms, license copy at:  http://www.apache.org/licenses/LICENSE-2.0]
   ======================================================================================================= 
 
-[+] loading circuit from 'testC2G.qasm' ...
-[-] loading quantum_code file 'testC2G.qasm'...
+[+] loading circuit from '/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QIDE/BELL/BELL.qcir' ...
+[-] loading quantum_code file '/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QIDE/BELL/BELL.qcir'...
 [+] code loaded successfully. 
 [+] initializing xpu...
 [+] initialized.
@@ -26,4 +26,4 @@
 ------------------------------------------- 
 [>>] measurement register  :  | 0 | 0 |
 ------------------------------------------- 
-[+] circuit execution time: +0.000322 sec.
+[+] circuit execution time: +0.000698 sec.
