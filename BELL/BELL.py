@@ -1,1 +1,0 @@
-OpenQL Editor
