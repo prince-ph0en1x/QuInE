@@ -5,21 +5,67 @@
 ## \repo: https://gitlab.com/prince-ph0en1x/QuInE
 ## \proj: Quantum-accelerated Genome-sequencing
 
-'''
-* Solution probability independent of p
-* Steps
-	Init with w
-	Dist with p
-	Find 0 dist and AA
-'''
-
 from openql import openql as ql
 from random import random
 from math import *
+from PIL import Image
 import os
 
 def QPD():
     
+    '''
+    w2 = Image.open("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/Einstein64.png")    
+    wrgb = w2.convert('RGB')
+    wbw = wrgb
+    for i in range(0,w2.size[0]):
+        for j in range(0,w2.size[1]):
+            if wrgb.getpixel((i,j))[0] > 150:
+                wbw.putpixel((i,j),(255,255,255))
+            else:
+                wbw.putpixel((i,j),(0,0,0))
+    wbw.save("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/Einstein64bw.png")
+    '''
+    
+    A = 2		# Binary Alphabet {0,1} := {(0,0,0),(255,255,255)} Black and White Image
+    D = 2
+
+    w2di = Image.open("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/Einstein64bw.png")
+    w2d = w2di.convert('RGB')
+    N0 = w2di.size[0]
+    N1 = w2di.size[1]
+
+    '''
+    for Msz in range(1,20):
+        print([Msz,2*ceil(log2(A))*Msz + ceil(log2((N0-Msz+1)*(N1-Msz+1)))])
+
+    M0 = 5
+    M1 = 5
+    idx0 = 20
+    idx1 = 20
+    p2d = w2d.crop((idx0,idx1,idx0+M0,idx1+M1)) 
+    p2d.save("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/template.png")
+    
+    ans = w2d
+    for i in range(idx0,idx0+M0):
+        for j in range(idx1,idx1+M1):
+            if ans.getpixel((i,j))[0] == 255:
+                ans.putpixel((i,j),(0,255,0))
+            else:
+                ans.putpixel((i,j),(255,0,0))
+    ans.save("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/answer.png")
+    '''
+
+    p2di = Image.open("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/Einstein64bw.png")
+    p2d = p2di.convert('RGB')
+    M0 = p2di.size[0]
+    M1 = p2di.size[1]
+
+
+
+
+
+
+
     N = 11           # Reference String size
     w = "11001010001" # Reference String      #randStr(2,N)
     
@@ -28,7 +74,6 @@ def QPD():
     #p = "1001"      # Search String         #randStr(2,M)   
     p = "1010"      # Search String         #randStr(2,M)   
 
-    A = 2		# Binary Alphabet {0,1}
     Q1 = ceil(log2(A))*M	# Data Qubits
     Q2 = ceil(log2(N-M+1))	# Tag Qubits 
 
@@ -55,13 +100,13 @@ def QPD():
     # Kernel 4: Amplitude Amplification
     qk4 = ql.Kernel('QCirc4',platform)
     Circ4(qk4,Q1,Q2,anc)    
-
     prog.add_kernel(qk1)
+    '''
     prog.add_kernel(qk2)
     for i in range(0,2):
         prog.add_kernel(qk3)
         prog.add_kernel(qk4)
-
+    '''
     prog.compile(False, "ASAP", False)
     display()
     #showQasm(1)
