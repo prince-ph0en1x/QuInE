@@ -25,110 +25,101 @@ qubits 17
    x q0
    x q1
    x q2
-   toffoli q0,q1,q11
-   toffoli q2,q11,q12
-   cnot q12,q3
-   toffoli q2,q11,q12
-   toffoli q0,q1,q11
-   toffoli q0,q1,q11
-   toffoli q2,q11,q12
-   cnot q12,q4
-   toffoli q2,q11,q12
-   toffoli q0,q1,q11
+   toffoli q0,q1,q7
+   toffoli q2,q7,q3
+   toffoli q0,q1,q7
+   toffoli q2,q7,q3
+   toffoli q0,q1,q7
+   toffoli q2,q7,q4
+   toffoli q0,q1,q7
+   toffoli q2,q7,q4
    x q0
    x q1
    x q2
    x q0
    x q1
-   toffoli q0,q1,q11
-   toffoli q2,q11,q12
-   cnot q12,q3
-   toffoli q2,q11,q12
-   toffoli q0,q1,q11
-   toffoli q0,q1,q11
-   toffoli q2,q11,q12
-   cnot q12,q6
-   toffoli q2,q11,q12
-   toffoli q0,q1,q11
+   toffoli q0,q1,q7
+   toffoli q2,q7,q3
+   toffoli q0,q1,q7
+   toffoli q2,q7,q3
+   toffoli q0,q1,q7
+   toffoli q2,q7,q6
+   toffoli q0,q1,q7
+   toffoli q2,q7,q6
    x q0
    x q1
    x q0
    x q2
-   toffoli q0,q1,q11
-   toffoli q2,q11,q12
-   cnot q12,q5
-   toffoli q2,q11,q12
-   toffoli q0,q1,q11
+   toffoli q0,q1,q7
+   toffoli q2,q7,q5
+   toffoli q0,q1,q7
+   toffoli q2,q7,q5
    x q0
    x q2
    x q0
-   toffoli q0,q1,q11
-   toffoli q2,q11,q12
-   cnot q12,q4
-   toffoli q2,q11,q12
-   toffoli q0,q1,q11
-   toffoli q0,q1,q11
-   toffoli q2,q11,q12
-   cnot q12,q6
-   toffoli q2,q11,q12
-   toffoli q0,q1,q11
+   toffoli q0,q1,q7
+   toffoli q2,q7,q4
+   toffoli q0,q1,q7
+   toffoli q2,q7,q4
+   toffoli q0,q1,q7
+   toffoli q2,q7,q6
+   toffoli q0,q1,q7
+   toffoli q2,q7,q6
    x q0
    x q1
    x q2
-   toffoli q0,q1,q11
-   toffoli q2,q11,q12
-   cnot q12,q3
-   toffoli q2,q11,q12
-   toffoli q0,q1,q11
-   toffoli q0,q1,q11
-   toffoli q2,q11,q12
-   cnot q12,q5
-   toffoli q2,q11,q12
-   toffoli q0,q1,q11
+   toffoli q0,q1,q7
+   toffoli q2,q7,q3
+   toffoli q0,q1,q7
+   toffoli q2,q7,q3
+   toffoli q0,q1,q7
+   toffoli q2,q7,q5
+   toffoli q0,q1,q7
+   toffoli q2,q7,q5
    x q1
    x q2
    x q1
-   toffoli q0,q1,q11
-   toffoli q2,q11,q12
-   cnot q12,q4
-   toffoli q2,q11,q12
-   toffoli q0,q1,q11
+   toffoli q0,q1,q7
+   toffoli q2,q7,q4
+   toffoli q0,q1,q7
+   toffoli q2,q7,q4
    x q1
    x q2
-   toffoli q0,q1,q11
-   toffoli q2,q11,q12
-   cnot q12,q3
-   toffoli q2,q11,q12
-   toffoli q0,q1,q11
+   toffoli q0,q1,q7
+   toffoli q2,q7,q3
+   toffoli q0,q1,q7
+   toffoli q2,q7,q3
    x q2
-   toffoli q0,q1,q11
-   toffoli q2,q11,q12
-   cnot q12,q6
-   toffoli q2,q11,q12
-   toffoli q0,q1,q11
+   toffoli q0,q1,q7
+   toffoli q2,q7,q6
+   toffoli q0,q1,q7
+   toffoli q2,q7,q6
+
+.QCirc2
    x q7
    x q9
    cnot q7,q3
    cnot q8,q4
    cnot q9,q5
    cnot q10,q6
+
+.QCirc3
    x q3
    x q4
    x q5
    x q6
    h q3
-   toffoli q4,q5,q11
-   toffoli q6,q11,q12
-   cnot q12,q3
-   toffoli q6,q11,q12
-   toffoli q4,q5,q11
+   toffoli q4,q5,q0
+   toffoli q6,q0,q3
+   toffoli q4,q5,q0
+   toffoli q6,q0,q3
    h q3
    x q3
    x q4
    x q5
    x q6
 
-.QCirc3
+.QCirc4
    h q0
    x q0
    h q1
@@ -144,17 +135,110 @@ qubits 17
    h q6
    x q6
    h q0
-   toffoli q1,q2,q11
-   toffoli q3,q11,q12
-   toffoli q4,q12,q13
-   toffoli q5,q13,q14
-   toffoli q6,q14,q15
-   cnot q15,q0
-   toffoli q6,q14,q15
-   toffoli q5,q13,q14
-   toffoli q4,q12,q13
-   toffoli q3,q11,q12
-   toffoli q1,q2,q11
+   toffoli q1,q2,q4
+   toffoli q3,q4,q7
+   toffoli q1,q2,q4
+   toffoli q3,q4,q7
+   toffoli q4,q5,q2
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q4,q5,q2
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q1,q2,q4
+   toffoli q3,q4,q7
+   toffoli q1,q2,q4
+   toffoli q3,q4,q7
+   toffoli q4,q5,q2
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q4,q5,q2
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   h q0
+   x q0
+   h q0
+   x q1
+   h q1
+   x q2
+   h q2
+   x q3
+   h q3
+   x q4
+   h q4
+   x q5
+   h q5
+   x q6
+   h q6
+
+.QCirc3
+   x q3
+   x q4
+   x q5
+   x q6
+   h q3
+   toffoli q4,q5,q0
+   toffoli q6,q0,q3
+   toffoli q4,q5,q0
+   toffoli q6,q0,q3
+   h q3
+   x q3
+   x q4
+   x q5
+   x q6
+
+.QCirc4
+   h q0
+   x q0
+   h q1
+   x q1
+   h q2
+   x q2
+   h q3
+   x q3
+   h q4
+   x q4
+   h q5
+   x q5
+   h q6
+   x q6
+   h q0
+   toffoli q1,q2,q4
+   toffoli q3,q4,q7
+   toffoli q1,q2,q4
+   toffoli q3,q4,q7
+   toffoli q4,q5,q2
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q4,q5,q2
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q1,q2,q4
+   toffoli q3,q4,q7
+   toffoli q1,q2,q4
+   toffoli q3,q4,q7
+   toffoli q4,q5,q2
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q4,q5,q2
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
+   toffoli q6,q7,q1
+   toffoli q2,q1,q0
    h q0
    x q0
    h q0
