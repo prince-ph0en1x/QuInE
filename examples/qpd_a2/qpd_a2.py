@@ -1,7 +1,7 @@
 ## Reference: Fast quantum search algorithms in protein sequence comparison: Quantum bioinformatics - L. Hollenberg
 ## arXiv:
 
-## \date: 23-01-2018 - 24-01-2018
+## \date: 23-01-2018 - 25-01-2018
 ## \repo: https://gitlab.com/prince-ph0en1x/QuInE
 ## \proj: Quantum-accelerated Genome-sequencing
 
@@ -20,24 +20,24 @@ import os
 
 def QPD():
     
-    N = 11           # Reference String size
+    A = 2			# Binary Alphabet {0,1}
+    
+    N = 11           	# Reference String size
     w = "11001010001" # Reference String      #randStr(2,N)
     
-    M = 4           # Search String size
-    dummyp = "0000" # indices out of range will be tagged with dummyp data
-    #p = "1001"      # Search String         #randStr(2,M)   
-    p = "1010"      # Search String         #randStr(2,M)   
+    M = 4           	# Search String size
+    dummyp = "0000" 	# indices out of range will be tagged with dummyp data
+    p = "1010"      	# Search String         #randStr(2,M)   
 
-    A = 2		# Binary Alphabet {0,1}
     Q1 = ceil(log2(A))*M	# Data Qubits
     Q2 = ceil(log2(N-M+1))	# Tag Qubits 
 
     config_fn = os.path.join('gateConfig.json')
     platform = ql.Platform('platform_none', config_fn)
     
-    ancmax = 0	#(Q1+Q2)-1
-    anc = 2*Q1+Q2
-    total_qubits = 2*Q1+Q2+ancmax
+    ancmax = 1	#(Q1+Q2)-1
+    anc = Q1+Q2
+    total_qubits = Q1+Q2+ancmax
     prog = ql.Program('qg', total_qubits, platform)
 
     # Kernel 1: Construct Quantum Phone Directory
@@ -83,7 +83,7 @@ def Circ1(k,w,N,M,total_qubits,Q1,Q2,anc):
         print([Qis,wMi])
         for wisi in range(0,M):
             if wMi[wisi] == '1':
-                nCXb(k,nc,Q2+wisi,Q1+Q2)
+                nCXb(k,nc,Q2+wisi,anc)
         for Qisi in range(0,Q2):
             if Qis[Qisi] == '0':
                 k.gate("x",Qisi)
@@ -91,10 +91,8 @@ def Circ1(k,w,N,M,total_qubits,Q1,Q2,anc):
 def Circ2(k,p,M,Q1,Q2):
     for Qi in range(0,M):
         if p[Qi] == '1':
-            k.gate("x",Q1+Q2+Qi)
-    for Qi in range(0,M):
-        k.gate("cnot",Q1+Q2+Qi,Q2+Qi)
-    
+            k.gate("x",Q2+Qi)
+
 def Circ3(k,M,Q2,anc):
     for Qi in range(0,M):
         k.gate("x",Q2+Qi) 
@@ -113,11 +111,28 @@ def Circ4(k,Q1,Q2,anc):
     nc = []
     for sj in range(1,Q1+Q2):
         nc.append(sj)
-    nCXb(k,nc,0,Q1+Q2)
+    nCXb(k,nc,0,anc)
     k.gate("h",0)
     for si in range(0,Q1+Q2):
         k.gate("x",si)
         k.gate("h",si)
+    return
+
+def nCXb(k,c,t,b):
+    nc = len(c)
+    if nc == 1:
+        k.gate("cnot",c[0],t)
+    elif nc == 2:
+        k.toffoli(c[0],c[1],t)
+    else:
+        nch = ceil(nc/2)
+        c1 = c[:nch]
+        c2 = c[nch:]
+        c2.append(b)
+        nCXb(k,c1,b,nch+1)
+        nCXb(k,c2,t,nch-1)
+        nCXb(k,c1,b,nch+1)
+        nCXb(k,c2,t,nch-1)
     return
 
 def nCX(k,c,t,anc):
@@ -134,30 +149,6 @@ def nCX(k,c,t,anc):
         for i in range(nc-1,1,-1):
             k.toffoli(c[i],anc+i-2,anc+i-1) 
         k.toffoli(c[0],c[1],anc)
-    return
-
-def nCXb(k,c,t,b):
-    #print([c,t,b])
-    nc = len(c)
-    if nc == 1:
-        #print(["cnot",c[0],t])
-        k.gate("cnot",c[0],t)
-    elif nc == 2:
-        #print(["toffoli",c[0],c[1],t])
-        k.toffoli(c[0],c[1],t)
-    else:
-        nch = ceil(nc/2)
-        c1 = c[:nch]
-        c2 = c[nch:]
-        c2.append(b)
-        #print(["-->",c[:nch],b,nch+1])
-        nCXb(k,c1,b,nch+1)
-        #print(["-->",c[nch:],t,nch-1])
-        nCXb(k,c2,t,nch-1)
-        #print(["-->",c[:nch],b,nch+1])
-        nCXb(k,c1,b,nch+1)
-        #print(["-->",c[nch:],t,nch-1])
-        nCXb(k,c2,t,nch-1)
     return
 
 def display():
