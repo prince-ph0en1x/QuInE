@@ -14,36 +14,46 @@ import os
 def QPD():
     
     '''
-    w2 = Image.open("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/Einstein64.png")    
-    wrgb = w2.convert('RGB')
-    wbw = wrgb
-    for i in range(0,w2.size[0]):
-        for j in range(0,w2.size[1]):
-            if wrgb.getpixel((i,j))[0] > 150:
+    w2di = Image.open("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/panda18.png")    
+    w2d = w2di.convert('RGBA')
+    wbw = w2d
+    for i in range(0,w2d.size[0]):
+        for j in range(0,w2d.size[1]):
+            if w2d.getpixel((i,j))[3] == 0:		# Set transparent to white
+                wbw.putpixel((i,j),(255,255,255))
+            elif w2d.getpixel((i,j))[0] > 150:
                 wbw.putpixel((i,j),(255,255,255))
             else:
                 wbw.putpixel((i,j),(0,0,0))
-    wbw.save("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/Einstein64bw.png")
+    wbw.save("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/panda18bw.png")
     '''
     
     A = 2		# Binary Alphabet {0,1} := {(0,0,0),(255,255,255)} Black and White Image
     D = 2
 
-    w2di = Image.open("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/Einstein64bw.png")
+    w2di = Image.open("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/panda18bw.png")
     w2d = w2di.convert('RGB')
     N0 = w2di.size[0]
     N1 = w2di.size[1]
-
+    
     '''
     for Msz in range(1,20):
-        print([Msz,2*ceil(log2(A))*Msz + ceil(log2((N0-Msz+1)*(N1-Msz+1)))])
+        M0 = Msz
+        M1 = Msz
+        Q_tag = ceil(log2(N0-M0+1)) + ceil(log2(N1-M1+1))
+        Q_data = ceil(log2(A)) * M0 * M1
+        Q_anc = 1  
+        print([Msz,Q_tag+Q_data+Q_anc])
+    # Template Size vs Total Qubits: [1, 14],[2, 17],[3, 22],[4, 29],[5, 38],[6, 49],[7, 62]
+    '''
 
-    M0 = 5
-    M1 = 5
-    idx0 = 20
-    idx1 = 20
+    '''
+    M0 = 3
+    M1 = 3
+    idx0 = 9		# Expected Answer i_0
+    idx1 = 8		# Expected Answer i_1
     p2d = w2d.crop((idx0,idx1,idx0+M0,idx1+M1)) 
-    p2d.save("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/template.png")
+    p2d.save("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/panda_p.png")
     
     ans = w2d
     for i in range(idx0,idx0+M0):
@@ -55,112 +65,109 @@ def QPD():
     ans.save("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/answer.png")
     '''
 
-    p2di = Image.open("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/Einstein64bw.png")
+    p2di = Image.open("/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qtm_a2/panda_p.png")
     p2d = p2di.convert('RGB')
     M0 = p2di.size[0]
     M1 = p2di.size[1]
 
-
-
-
-
-
-
-    N = 11           # Reference String size
-    w = "11001010001" # Reference String      #randStr(2,N)
-    
-    M = 4           # Search String size
-    dummyp = "0000" # indices out of range will be tagged with dummyp data
-    #p = "1001"      # Search String         #randStr(2,M)   
-    p = "1010"      # Search String         #randStr(2,M)   
-
-    Q1 = ceil(log2(A))*M	# Data Qubits
-    Q2 = ceil(log2(N-M+1))	# Tag Qubits 
+    Q_tag = ceil(log2(N0-M0+1)) + ceil(log2(N1-M1+1))
+    Q_data = ceil(log2(A)) * M0 * M1
+    Q_anc = 1  
+    anc = Q_tag + Q_data
 
     config_fn = os.path.join('gateConfig.json')
     platform = ql.Platform('platform_none', config_fn)
     
-    ancmax = 0	#(Q1+Q2)-1
-    anc = 2*Q1+Q2
-    total_qubits = 2*Q1+Q2+ancmax
-    prog = ql.Program('qg', total_qubits, platform)
+    Q_total =  Q_tag + Q_data + Q_anc
+    prog = ql.Program('qg', Q_total, platform)
 
     # Kernel 1: Construct Quantum Phone Directory
-    qk1 = ql.Kernel('QCirc1',platform)
-    Circ1(qk1,w,N,M,total_qubits,Q1,Q2,anc)
+    qk1 = ql.Kernel('QCirc1',platform)    
+    Circ1(qk1,w2d,N0,N1,M0,M1,Q_total,Q_tag,Q_data,anc)
 
     # Kernel 2: Calculate Hamming Distance
     qk2 = ql.Kernel('QCirc2',platform)
-    Circ2(qk2,p,M,Q1,Q2)
+    Circ2(qk2,p2d,M0,M1,Q_tag)
     
     # Kernel 3: Oracle to Mark Hamming Distance of 0
     qk3 = ql.Kernel('QCirc3',platform)
-    Circ3(qk3,M,Q2,anc)
-    
+    Circ3(qk3,Q_tag,Q_data)
+
     # Kernel 4: Amplitude Amplification
     qk4 = ql.Kernel('QCirc4',platform)
-    Circ4(qk4,Q1,Q2,anc)    
+    Circ4(qk4,Q_tag,Q_data,Q_anc)
+    
     prog.add_kernel(qk1)
-    '''
     prog.add_kernel(qk2)
-    for i in range(0,2):
+    gn = floor(sqrt(Q_tag+Q_data))	# Grover Step root N times, where N is the width of the Grover Gate
+    for i in range(0,gn):
         prog.add_kernel(qk3)
         prog.add_kernel(qk4)
-    '''
+
     prog.compile(False, "ASAP", False)
     display()
     #showQasm(1)
 
-def Circ1(k,w,N,M,total_qubits,Q1,Q2,anc):
-    for Qi in range(0,total_qubits):
+def Circ1(k,w2d,N0,N1,M0,M1,Q_total,Q_tag,Q_data,anc):
+    for Qi in range(0,Q_total):
         k.prepz(Qi)
-    for Qi in range(0,Q2):
+    for Qi in range(0,Q_tag):
         k.gate("h",Qi)
     nc = []
-    for ci in range(0,Q2):
+    for ci in range(0,Q_tag):
         nc.append(ci)
-    for Qi in range(0,N-M+1):
-        Qis = format(Qi,'0'+str(Q2)+'b')
-        for Qisi in range(0,Q2):
-            if Qis[Qisi] == '0':
-                k.gate("x",Qisi)
-        wMi = w[Qi:Qi+M]
-        print([Qis,wMi])
-        for wisi in range(0,M):
-            if wMi[wisi] == '1':
-                nCXb(k,nc,Q2+wisi,Q1+Q2)
-        for Qisi in range(0,Q2):
-            if Qis[Qisi] == '0':
-                k.gate("x",Qisi)
-
-def Circ2(k,p,M,Q1,Q2):
-    for Qi in range(0,M):
-        if p[Qi] == '1':
-            k.gate("x",Q1+Q2+Qi)
-    for Qi in range(0,M):
-        k.gate("cnot",Q1+Q2+Qi,Q2+Qi)
+    Qt0 = ceil(log2(N0-M0+1))
+    Qt1 = ceil(log2(N1-M1+1))
+    for i0 in range(0,N0-M0+1):
+        i0s = format(i0,'0'+str(Qt0)+'b')
+        for i0si in range(0,Qt0):
+            if i0s[i0si] == '0':
+                k.gate("x",i0si)
+        for i1 in range(0,N1-M1+1):
+            i1s = format(i1,'0'+str(Qt1)+'b')
+            for i1si in range(0,Qt1):
+                if i1s[i1si] == '0':
+                    k.gate("x",Qt0+i1si)
+            for w2dim0i in range(0,M0):
+                for w2dim1i in range(0,M1):
+                    if w2d.getpixel((i0+w2dim0i,i1+w2dim1i))[0] == 0:
+                        nCXb(k,nc,Q_tag+w2dim0i*M1+w2dim1i,anc)
+            for i1si in range(0,Qt1):
+                if i1s[i1si] == '0':
+                    k.gate("x",Qt0+i1si)
+        for i0si in range(0,Qt0):
+            if i0s[i0si] == '0':
+                k.gate("x",i0si)
+                 
+def Circ2(k,p2d,M0,M1,Q_tag):
+    for p2dm0i in range(0,M0):
+        for p2dm1i in range(0,M1):
+            if p2d.getpixel((p2dm0i,p2dm1i))[0] == 0:
+                k.gate("x",Q_tag+p2dm0i*M1+p2dm1i)
     
-def Circ3(k,M,Q2,anc):
-    for Qi in range(0,M):
-        k.gate("x",Q2+Qi) 
-    k.gate("h",Q2)
-    nc = [4,5,6]
-    nCXb(k,nc,Q2,0)
-    k.gate("h",Q2)
-    for Qi in range(0,M):
-        k.gate("x",Q2+Qi)
+def Circ3(k,Q_tag,Q_data):
+    nc = []
+    for Qi in range(0,Q_data):
+        k.gate("x",Q_tag+Qi)
+        if Qi > 0:
+            nc.append(Q_tag+Qi)
+    k.gate("h",Q_tag)
+    nCXb(k,nc,Q_tag,0)
+    k.gate("h",Q_tag)
+    for Qi in range(0,Q_data):
+        k.gate("x",Q_tag+Qi)
 
-def Circ4(k,Q1,Q2,anc):
-    for si in range(0,Q1+Q2):
+def Circ4(k,Q_tag,Q_data,Q_anc):
+    for si in range(0,Q_tag+Q_data):
         k.gate("h",si)
         k.gate("x",si)
     k.gate("h",0)
     nc = []
-    for sj in range(1,Q1+Q2):
+    for sj in range(1,Q_tag+Q_data):
         nc.append(sj)
-    nCXb(k,nc,0,Q1+Q2)
+    nCXb(k,nc,0,Q_anc)
     k.gate("h",0)
-    for si in range(0,Q1+Q2):
+    for si in range(0,Q_tag+Q_data):
         k.gate("x",si)
         k.gate("h",si)
     return
@@ -185,24 +192,28 @@ def nCXb(k,c,t,b):
     #print([c,t,b])
     nc = len(c)
     if nc == 1:
-        #print(["cnot",c[0],t])
         k.gate("cnot",c[0],t)
     elif nc == 2:
-        #print(["toffoli",c[0],c[1],t])
         k.toffoli(c[0],c[1],t)
     else:
         nch = ceil(nc/2)
         c1 = c[:nch]
         c2 = c[nch:]
         c2.append(b)
-        #print(["-->",c[:nch],b,nch+1])
-        nCXb(k,c1,b,nch+1)
-        #print(["-->",c[nch:],t,nch-1])
-        nCXb(k,c2,t,nch-1)
-        #print(["-->",c[:nch],b,nch+1])
-        nCXb(k,c1,b,nch+1)
-        #print(["-->",c[nch:],t,nch-1])
-        nCXb(k,c2,t,nch-1)
+        nb1 = 0
+        for bi in range(0,50):
+            if not (bi in c1) and bi != b:
+                nb1 = bi
+                break
+        nb2 = 0
+        for bi in range(0,50):
+            if not (bi in c2) and bi != t:
+                nb2 = bi
+                break 
+        nCXb(k,c1,b,nb1)
+        nCXb(k,c2,t,nb2)
+        nCXb(k,c1,b,nb1)
+        nCXb(k,c2,t,nb2)
     return
 
 def display():
