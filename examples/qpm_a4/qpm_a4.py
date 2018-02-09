@@ -15,7 +15,7 @@ def QPM():
     
     A = 4
     N = 8                           # Reference Genome size
-    w = "22013201"  # 22013200 #randStr(2,N)    # Reference Genome
+    w = "22013220"  # 22013200 #randStr(2,N)    # Reference Genome
     M = 2                           # Short Read size
     p = "13"        #randStr(2,M)   # Short Read
     s = ceil(log2(N-M))

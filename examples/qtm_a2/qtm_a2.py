@@ -96,11 +96,16 @@ def QPD():
     # Kernel 4: Amplitude Amplification
     qk4 = ql.Kernel('QCirc4',platform)
     Circ4(qk4,Q_tag,Q_data,Q_anc)
+
+    # Kernel 5: Partial Amplitude Amplification
+    qk5 = ql.Kernel('QCirc5',platform)
+    Circ5(qk5,Q_tag,Q_data,Q_anc)
     
     prog.add_kernel(qk1)
     prog.add_kernel(qk2)
-    gn = floor(sqrt(Q_tag+Q_data))	# Grover Step root N times, where N is the width of the Grover Gate
-    for i in range(0,gn):
+    for i in range(0,1):    # Optimal iteration from calculation is 111
+        prog.add_kernel(qk3)
+        prog.add_kernel(qk5)
         prog.add_kernel(qk3)
         prog.add_kernel(qk4)
 
@@ -168,6 +173,21 @@ def Circ4(k,Q_tag,Q_data,Q_anc):
     nCXb(k,nc,0,Q_anc)
     k.gate("h",0)
     for si in range(0,Q_tag+Q_data):
+        k.gate("x",si)
+        k.gate("h",si)
+    return
+
+def Circ5(k,Q_tag,Q_data,Q_anc):
+    for si in range(Q_tag,Q_tag+Q_data):
+        k.gate("h",si)
+        k.gate("x",si)
+    k.gate("h",Q_tag)
+    nc = []
+    for sj in range(Q_tag+1,Q_tag+Q_data):
+        nc.append(sj)
+    nCXb(k,nc,0,Q_anc)
+    k.gate("h",Q_tag)
+    for si in range(Q_tag,Q_tag+Q_data):
         k.gate("x",si)
         k.gate("h",si)
     return

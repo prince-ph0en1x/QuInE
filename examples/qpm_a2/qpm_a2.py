@@ -12,8 +12,8 @@ import os
 
 def QPM():
     
-    N = 9           # Reference String size
-    w = "111000000" # Reference String      #randStr(2,N)   
+    N = 21#9           # Reference String size
+    w = "111000000000000001111" # Reference String      #randStr(2,N)   
     M = 2           # Search String size
     p = "10"        # Search String         #randStr(2,M)   
     s = ceil(log2(N))
@@ -54,12 +54,20 @@ def QPM():
     for pi in range(0,M):
         if p[pi] == '0':
             Circ2(qk2_0,f0,s,pi*s,s*M)
-            prog.add_kernel(qk2_0)
         elif p[pi] == '1':
             Circ2(qk2_1,f1,s,pi*s,s*M)
-            prog.add_kernel(qk2_1)
         # Improve: Reset Kernels
-        prog.add_kernel(qk3)
+    
+    iterMax = ceil(sqrt(2**(s*M)))
+    print()
+    for iter in range(0,iterMax):
+        #print(iter)
+        for pi in range(0,M):
+            if p[pi] == '0':
+                prog.add_kernel(qk2_0)
+            elif p[pi] == '1':
+                prog.add_kernel(qk2_1)
+            prog.add_kernel(qk3)
     
     prog.compile(False, "ASAP", False)
     display()

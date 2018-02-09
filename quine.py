@@ -498,6 +498,7 @@ class Window(QtGui.QMainWindow):
 		file = open(self.dirProj+"/"+"logQ2G.txt",'r')
 		self.plotOutput(file)
 		file.close()
+		#return
 		text = open(self.dirProj+"/"+"logQ2G.txt",'r').read()
 		self.textLog.setText(text)
 		self.tabLayout.setCurrentWidget(self.textLog)
@@ -806,9 +807,11 @@ class Window(QtGui.QMainWindow):
 				state = int(mtch.group(3),2) 
 				ploty[state] = x #x**2 + y**2      # check, sqrt reqd? OR z.z'
 		cstmPloty = customPlot(ploty)
+		#return
 		ax = self.figure.add_subplot(1,1,1)   
 		ax.clear()
-		ax.plot(cstmPloty, '*-r')
+		#ax.plot(cstmPloty, '*-r')
+		ax.bar(range(len(cstmPloty)),cstmPloty)
 		ax.set_xlim([0,len(cstmPloty)])
 		ax.tick_params(axis='x',labelbottom='off')
 		ax.set_ylim([-1,1])

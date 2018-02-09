@@ -18,19 +18,19 @@
 [+] initialized.
 [+] creating quantum register of 10 qubits... 
 [+] executing circuit 'qcirc1' (1 iter) ...
-[+] circuit execution time: 0.00362971 sec.
+[+] circuit execution time: 0.00323492 sec.
 [+] executing circuit 'qcirc2' (1 iter) ...
-[+] circuit execution time: 0.000308927 sec.
+[+] circuit execution time: 0.000206625 sec.
 [+] executing circuit 'qcirc3' (1 iter) ...
-[+] circuit execution time: 0.00151281 sec.
+[+] circuit execution time: 0.00104731 sec.
 [+] executing circuit 'qcirc4' (1 iter) ...
-[+] circuit execution time: 0.00395842 sec.
+[+] circuit execution time: 0.00297657 sec.
 [+] executing circuit 'qcirc3' (1 iter) ...
-[+] circuit execution time: 0.00145428 sec.
+[+] circuit execution time: 0.00106221 sec.
 [+] executing circuit 'qcirc4' (1 iter) ...
-[+] circuit execution time: 0.00326197 sec.
+[+] circuit execution time: 0.00285491 sec.
 [+] executing circuit 'qcirc3' (1 iter) ...
-[+] circuit execution time: 0.00107294 sec.
+[+] circuit execution time: 0.00106987 sec.
 [+] executing circuit 'qcirc4' (1 iter) ...
 --------------[quantum state]-------------- 
    (-0.012904,+0.000000) |0000000000> +
@@ -550,4 +550,4 @@
 ------------------------------------------- 
 [>>] measurement register  :  | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 ------------------------------------------- 
-[+] circuit execution time: +0.017750 sec.
+[+] circuit execution time: +0.018125 sec.

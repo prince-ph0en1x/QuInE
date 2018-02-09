@@ -1,7 +1,7 @@
 ## Reference: Fast quantum search algorithms in protein sequence comparison: Quantum bioinformatics - L. Hollenberg
 ## arXiv:
 
-## \date: 24-01-2018 - 25-01-2018
+## \date: 24-01-2018 - 09-02-2018
 ## \repo: https://gitlab.com/prince-ph0en1x/QuInE
 ## \proj: Quantum-accelerated Genome-sequencing
 
@@ -36,7 +36,7 @@ def QPD():
     config_fn = os.path.join('gateConfig.json')
     platform = ql.Platform('platform_none', config_fn)
     
-    ancmax = 1
+    ancmax = 1 #(Q1+Q2)-2
     anc = Q1+Q2
     total_qubits = Q1+Q2+ancmax
     prog = ql.Program('qg', total_qubits, platform)
@@ -57,10 +57,30 @@ def QPD():
     qk4 = ql.Kernel('QCirc4',platform)
     Circ4(qk4,Q1,Q2,anc)    
     
+    # Finding optimal iterations for known arbitrary initial amplitude distribution
+    '''    
+    A = 4;
+    M = 3;
+    N = 10;
+    r = 1;
+    
+    iMx = N-M+1;
+    qtag = ceil(log2(iMx));
+    qb = qtag + M*ceil(log2(A));
+    sMx = 2^qb;
+    
+    kavg0 = 1/sqrt(iMx);
+    lavg0 = (iMx - r)/((sMx - r)*sqrt(iMx));
+    Pmax = 1 - (sMx-iMx)*lavg0^2 - (iMx-r)*(1/sqrt(iMx) - lavg0)^2
+    
+    j = [0:9];
+    T = ((j+0.5)*pi - atan(kavg0*sqrt(r/(sMx-r))/lavg0))/acos(1-2*r/sMx)'
+    '''    
+    # T = [3.3964, 38.9279, 74.4593, 109.9908, 145.5223, 181.0538, 216.5853, 252.1168, 287.6483, 323.1798]
+
     prog.add_kernel(qk1)
     prog.add_kernel(qk2)
-    gn = floor(sqrt(Q1+Q2))	# Grover Step root N times, where N is the width of the Grover Gate
-    for i in range(0,gn):
+    for i in range(0,3):
         prog.add_kernel(qk3)
         prog.add_kernel(qk4)
 
@@ -125,6 +145,8 @@ def Circ4(k,Q1,Q2,anc):
     return
 
 def nCXb(k,c,t,b):
+    #nCX(k,c,t,b)
+    #return
     nc = len(c)
     if nc == 1:
         k.gate("cnot",c[0],t)

@@ -47,9 +47,6 @@ qubits 10
    toffoli q0,q1,q2
    h q2
    x q0
-   h q2
-   toffoli q0,q1,q2
-   h q2
 
 .QCirc3
    h q0
