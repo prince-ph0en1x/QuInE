@@ -1,7 +1,7 @@
-## Reference: Quantum Pattern Matching - P. Mateus and Y. Omar
-## arXiv: quant-ph/0508237
+## Reference: Quantum Associative Memory - D. Ventura
+## arXiv: 
 
-## \date: 01-12-2017 - 20-01-2017
+## \date: 15-02-2018 - __-02-2018
 ## \repo: https://gitlab.com/prince-ph0en1x/QuInE
 ## \proj: Quantum-accelerated Genome-sequencing
 
@@ -10,7 +10,7 @@ from random import random
 from math import *
 import os
 
-def QPM():
+def QuAM():
     
     N = 9           # Reference String size
     w = "111000000" # Reference String      #randStr(2,N)   
@@ -21,22 +21,20 @@ def QPM():
     config_fn = os.path.join('gateConfig.json')
     platform = ql.Platform('platform_none', config_fn)
 
-
     total_qubits = 2*s*M-2
     prog = ql.Program('qg', total_qubits, platform)
+    
+    ###################################################################################################
+    #                                         Construct Kernels                                       #
+    ###################################################################################################
     
     # Initialization
     qk1 = ql.Kernel('QCirc1',platform)
     Circ1(qk1,s,M)
-    prog.add_kernel(qk1)
     
     # Oracle Kernels
     qk2_0 = ql.Kernel('QCirc2_0',platform)
     qk2_1 = ql.Kernel('QCirc2_1',platform)
-    
-    # Grover Amplitude Amplification
-    qk3 = ql.Kernel('QCirc3',platform)
-    Circ3(qk3,s,M)
     
     f0 = []
     f1 = []
@@ -58,8 +56,24 @@ def QPM():
             Circ2(qk2_1,f1,s,pi*s,s*M)
         # Improve: Reset Kernels
     
-    iterMax = 1  #ceil(sqrt(2**(s*M)))
-    print()
+    # Grover Amplitude Amplification
+    qk3 = ql.Kernel('QCirc3',platform)
+    Circ3(qk3,s,M)
+
+    ###################################################################################################
+    #                                         Construct Program                                       #
+    ###################################################################################################
+    
+    iterMax = 0 #ceil(sqrt(2**(s*M)))
+    prog.add_kernel(qk1)
+    prog.add_kernel(qk2_1)
+    prog.add_kernel(qk3)
+
+    for iter in range(0,iterMax):
+        prog.add_kernel(qk2_1)
+        prog.add_kernel(qk3)
+
+    '''
     for iter in range(0,iterMax):
         #print(iter)
         for pi in range(0,M):
@@ -68,7 +82,9 @@ def QPM():
             elif p[pi] == '1':
                 prog.add_kernel(qk2_1)
             prog.add_kernel(qk3)
-    
+    '''    
+
+
     prog.compile(False, "ASAP", False)
     display()
     #showQasm(1)
@@ -170,4 +186,4 @@ def randStr(szA,sz):
     return rbs
 
 if __name__ == '__main__':
-    QPM()
+    QuAM()
