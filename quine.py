@@ -22,12 +22,13 @@ class Window(QtGui.QMainWindow):
 	saved = 0
 	
 	circTick = 0
-	gateNames = ("X","Y","Z","H","S","T","Rx","Ry","Rz","CX","CZ","Tf")
-	gateCodes = ("x","y","z","h","s","t","rx","ry","rz","cnot","cphase","toffoli")
+	gateNames = ("X","Y","Z","H","S","T","Rx","Ry","Rz","CX","CZ","Tf",u"\u23F2",u"\U0001F441")
+	gateCodes = ("x","y","z","h","s","t","rx","ry","rz","cnot","cphase","toffoli","measure","display")
 	gateSets = ("All","Universal {H, Tf}","Universal {1Qb, CX}")
-	gateMasks = ("111111111111","000100000001","111111000100")
+	gateMasks = ("11111111111111","00010000000111","11111100010011")
 	drawGateQ = []
 	drawMaxQ = 0
+	delGateLno = 0
 		
 	def __init__(self):
 
@@ -196,7 +197,15 @@ class Window(QtGui.QMainWindow):
 		self.circReset()
 		gates = len(self.gateNames)
 		file = open(self.fileQCirc,'r')
+		self.drawMaxQ = 1	# For drawing measure and display, if circuit was not executed before
 		for line in iter(file):
+
+			# Qubits
+			ptrn = re.compile('^qubits\s(\d+)',re.IGNORECASE)
+			mtch = ptrn.search(line)
+			if mtch != None:
+				self.drawMaxQ = int(mtch.group(1))
+
 			# Single Qubit Gates
 			for g in range(0,9):
 				ptrn = re.compile('^\s*'+self.gateNames[g]+'\sq(\d+)',re.IGNORECASE)
@@ -213,6 +222,16 @@ class Window(QtGui.QMainWindow):
 			mtch = ptrn.search(line)
 			if mtch != None:
 				self.circGate(11,[int(mtch.group(1)),int(mtch.group(2)),int(mtch.group(3))])
+			# Measure
+			ptrn = re.compile("measure")
+			mtch = ptrn.search(line)
+			if mtch != None:
+				self.circGate(12,[0])
+			# Display
+			ptrn = re.compile("display")
+			mtch = ptrn.search(line)
+			if mtch != None:
+				self.circGate(13,[0])
 		# self.circuit.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
 
 	def importOpenql(self):
@@ -475,10 +494,9 @@ class Window(QtGui.QMainWindow):
 		self.btnLayoutQ.addWidget(self.btnQ2C,QtCore.Qt.AlignLeft)
 		
 		self.btnC2Q = QtGui.QPushButton(u"\u2191",self)
-		self.btnC2Q.clicked.connect(self.TBD)
+		self.btnC2Q.clicked.connect(self.convC2Q)
 		self.btnC2Q.setFixedSize(30,30)
 		self.btnLayoutQ.addWidget(self.btnC2Q,QtCore.Qt.AlignLeft)
-		self.btnC2Q.setEnabled(False)
 		
 		self.btnLayoutQ.addSpacing(40) 
 
@@ -498,7 +516,6 @@ class Window(QtGui.QMainWindow):
 		file = open(self.dirProj+"/"+"logQ2G.txt",'r')
 		self.plotOutput(file)
 		file.close()
-		#return
 		text = open(self.dirProj+"/"+"logQ2G.txt",'r').read()
 		self.textLog.setText(text)
 		self.tabLayout.setCurrentWidget(self.textLog)
@@ -574,7 +591,7 @@ class Window(QtGui.QMainWindow):
 		gates = len(self.gateNames)
 		for g in range(0,gates):
 			self.btn_g[g] = QtGui.QPushButton(self.gateNames[g],self)
-			self.btn_g[g].setFixedSize(bsz,bsz)
+			self.btn_g[g].setFixedSize(bsz,bsz-15)
 			self.btnLayoutGates.addWidget(self.btn_g[g],g/2+1,g%2,QtCore.Qt.AlignTop)
 			gc = (gc + 1)%2
 			if gc == 0:
@@ -591,14 +608,18 @@ class Window(QtGui.QMainWindow):
 		self.btn_g[9].clicked.connect(lambda: self.circSelGate(9))
 		self.btn_g[10].clicked.connect(lambda: self.circSelGate(10))
 		self.btn_g[11].clicked.connect(lambda: self.circSelGate(11))
+		self.btn_g[12].clicked.connect(lambda: self.circSelGate(12))
+		self.btn_g[13].clicked.connect(lambda: self.circSelGate(13))
 		
-		g = gates
-		self.btnGDel = QtGui.QPushButton(QtGui.QIcon("icons/del1.png"),'',self)
+		g = gates 
+		self.btnGDel = QtGui.QPushButton(u"\u2700",self)
+		#self.btnGDel = QtGui.QPushButton(QtGui.QIcon("icons/del1.png"),'',self)
 		self.btnGDel.setFixedSize(bsz,bsz)
 		self.btnLayoutGates.addWidget(self.btnGDel,g/2+1,g%2,QtCore.Qt.AlignTop)
 		self.btnGDel.clicked.connect(self.delGate)
 
-		g = g+1
+		g = g+1 
+		#self.btnGNew = QtGui.QPushButton(u"\U0001F441",self)
 		self.btnGNew = QtGui.QPushButton(QtGui.QIcon("icons/cg.png"),'',self)
 		self.btnGNew.setFixedSize(bsz,bsz)
 		self.btnLayoutGates.addWidget(self.btnGNew,g/2+1,g%2,QtCore.Qt.AlignTop)
@@ -616,9 +637,31 @@ class Window(QtGui.QMainWindow):
 	
 	def delGate(self):
 
-		# delete last line (before display) from qcirc and rerender
-
+		self.qcircuit.mousePressEvent = self.getDelGate
 		return
+
+	def getDelGate(self,event):
+
+		beg = 80
+		xsp = 50
+		ysp = 40
+		pos = QtCore.QPointF(event.scenePos())
+		
+		#qb = round((pos.y()-12)/ysp)
+		tk = round((pos.x() - beg - xsp/4)/xsp)
+
+		file = open(self.fileQCirc,'r+')
+		lines = file.readlines()
+		file.close()
+		
+		file = open(self.fileQCirc,'w')
+		lno = 0
+		for line in lines:
+			if lno != int(tk)+1:
+				file.write(line)
+			lno = lno + 1
+		file.close()
+		self.openQcirc()
 
 	def makeGate(self):
 
@@ -640,7 +683,9 @@ class Window(QtGui.QMainWindow):
 		
 		qb = round((pos.y()-12)/ysp)
 		tk = round((pos.x() - beg - xsp/4)/xsp)
-		print([pos,qb,tk])
+
+		self.delGateLno = tk
+		print([qb,tk])
 
 	def gateEnbl(self,set):
 
@@ -662,6 +707,14 @@ class Window(QtGui.QMainWindow):
 		# self.circuit.setDragMode(QtGui.QGraphicsView.NoDrag)
 		self.qcircuit.mousePressEvent = self.pixelSelect
 	
+# LOGIC RESIDES WHERE WE THINK IT RESIDES
+# UNIVERSE EVOLVED INTELLIGENCE TO REDISCOVER ITSELF
+
+# IF WE ARE THE CENTRE OF OUR FRAME OF REFERENCE, WHY DO WE NEED TO USE ENERGY
+# DREAM IS THE ILLUSION (MAYA) AND THE URGE TO BE IN IT IS THE DESIRE (MOH)
+# THE INFORMATIONAL DIFFERENCE BETWEEN A SARCASTIC AND NORMAL ANSWER IS 0, YET IT CAN TRANSMIT 1 SHANNON BIT OF INFORMATION TO THE RECEIVER
+
+
 	def pixelSelect(self, event):
 
 		# undo/redo gate button
@@ -670,6 +723,16 @@ class Window(QtGui.QMainWindow):
 		# make new unitary button
 		# insert custom kernel/unitary button
 
+		
+		file = open(self.fileQCirc,'r+')
+		content = file.read()
+		ptrn = re.compile('qubits')
+		mtch = ptrn.search(content)
+		if mtch == None:
+			file.seek(0, 0)
+			file.write("qubits "+str(int(self.drawMaxQ))+"\n" + content)
+		file.close()
+
 		file = open(self.fileQCirc,'a')
 		ysp = 40
 		qb = math.floor(event.scenePos().y()/ysp)
@@ -677,17 +740,21 @@ class Window(QtGui.QMainWindow):
 		if self.drawGate < 9:
 			if len(self.drawGateQ) == 1:
 				self.circGate(self.drawGate,self.drawGateQ)
-				file.write(self.gateCodes[self.drawGate]+" q"+str(self.drawGateQ[0])+"\n")
+				file.write(self.gateCodes[self.drawGate]+" q"+str(int(self.drawGateQ[0]))+"\n")
 				# self.circuit.mousePressEvent = None
 				# self.circuit.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-		elif self.drawGate == 9:
+		elif self.drawGate == 9:	# CNOT
 			if len(self.drawGateQ) == 2:
 				self.circGate(self.drawGate,self.drawGateQ)
-				file.write(self.gateCodes[self.drawGate]+" q"+str(self.drawGateQ[0])+",q"+str(self.drawGateQ[1])+"\n")
-		elif self.drawGate == 11:
+				file.write(self.gateCodes[self.drawGate]+" q"+str(int(self.drawGateQ[0]))+",q"+str(int(self.drawGateQ[1]))+"\n")
+		elif self.drawGate == 11:	# Toffoli
 			if len(self.drawGateQ) == 3:
 				self.circGate(self.drawGate,self.drawGateQ)
-				file.write(self.gateCodes[self.drawGate]+" q"+str(self.drawGateQ[0])+",q"+str(self.drawGateQ[1])+",q"+str(self.drawGateQ[2])+"\n")
+				file.write(self.gateCodes[self.drawGate]+" q"+str(int(self.drawGateQ[0]))+",q"+str(int(self.drawGateQ[1]))+",q"+str(int(self.drawGateQ[2]))+"\n")
+		elif self.drawGate >= 12:
+			if len(self.drawGateQ) == 1:
+				self.circGate(self.drawGate,self.drawGateQ)
+				file.write(self.gateCodes[self.drawGate]+"\n")
 		file.close()
 
 	def circGate(self,gateId,qbset):
@@ -733,24 +800,59 @@ class Window(QtGui.QMainWindow):
 			self.qcircuit.addRect(QtCore.QRectF(beg+xsp*self.circTick,ysp*qbt,rsz,rsz),penG,fill)
 			t = self.qcircuit.addText("X")
 			t.setPos(beg+xsp*self.circTick+4,ysp*qbt)
+		elif gateId >= 12:		# Display
+			if gateId == 13:
+				fill = QtGui.QBrush(QtCore.Qt.green)
+			self.qcircuit.addRect(QtCore.QRectF(beg+xsp*self.circTick,ysp*0,rsz,ysp*int(self.drawMaxQ-1)+rsz),penG,fill)
+			for qbt in range(0,int(self.drawMaxQ)):
+				t = self.qcircuit.addText(self.gateNames[gateId])
+				t.setPos(beg+xsp*self.circTick+1,ysp*qbt)
 		pen.setStyle(QtCore.Qt.DotLine)
 		self.qcircuit.addLine(QtCore.QLineF(beg+xsp*self.circTick-xsp/4,0,beg+xsp*self.circTick-xsp/4,ysp*qubits-ysp/4),pen)
 		self.circTick = self.circTick + 1   # allow parallel scheduling
-		
+	
+	def convC2Q(self):
+
+		file = open(self.fileQCirc,'r')
+		with file:
+			text = file.read()
+			self.textQasm.setText(text)
+		file.close()
+
 	def convC2G(self):
 
 		file = open(self.fileQCirc,'r+')
 		content = file.read()
-		ptrn = re.compile('qubits')
+		file.close()
+		ptrn = re.compile('^qubits\s(\d+)',re.IGNORECASE)
 		mtch = ptrn.search(content)
 		if mtch == None:
-			content = content + "display\n"
+			file = open(self.fileQCirc,'r+')
 			file.seek(0, 0)
-			file.write("qubits "+str(self.drawMaxQ)+"\n" + content)
-		file.close()
+			file.write("qubits "+str(int(self.drawMaxQ))+"\n" + content)
+			file.close()
+		else:
+			file = open(self.fileQCirc,'r+')
+			lines = file.readlines()
+			file.close()
+			file = open(self.fileQCirc,'w')
+			for line in lines:
+				mtch = ptrn.search(line)
+				if mtch == None:
+					file.write(line)
+			file.close()
+			file = open(self.fileQCirc,'r+')
+			content = file.read()
+			file.seek(0, 0)
+			file.write("qubits "+str(int(self.drawMaxQ))+"\n" + content)
+			file.close()
 		os.system("./qx_simulator_1.0.beta_linux_x86_64 "+self.fileQCirc+" > "+self.dirProj+"/"+"logC2G.txt")
 		file = open(self.dirProj+"/"+"logC2G.txt",'r')
 		self.plotOutput(file)
+		file.close()
+		text = open(self.dirProj+"/"+"logC2G.txt",'r').read()
+		self.textLog.setText(text)
+		self.tabLayout.setCurrentWidget(self.textLog)
 
 	#~~~~~~~~~~~~~~~~~~~~~~~~~ results ~~~~~~~~~~~~~~~~~~~~~~~~~#
 

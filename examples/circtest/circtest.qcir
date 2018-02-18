@@ -1,0 +1,19 @@
+qubits 6
+x q1
+x q5
+x q2
+x q3
+x q4
+x q5
+x q4
+x q3
+x q2
+x q1
+x q0
+x q1
+x q2
+x q3
+x q4
+x q5
+x q4
+display

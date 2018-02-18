@@ -46,10 +46,10 @@ python3 examples/qam_a4/qam_a4.py
 AS = {'0','1','2','3'}	# Alphabet Set {0,1,2,3} := {A,C,G,T} for DNA Nucleotide bases
 A = len(AS)
 
-RG = "3020310203"		# Reference Genome string
+RG = "3020310213"		# Reference Genome string
 N = len(RG)
 
-SR = "203"				# Short Read search string
+SR = "2?3"				# Short Read search string
 # dummyp = "000"		# indices out of range will be tagged with dummyp data
 M = len(SR)
 
@@ -151,11 +151,13 @@ def Circ1(k,anc):
 
 def Circ2(k):
 
-	for pi in range(0,M):
-		ppi = format(int(SR[pi]),'0'+str(Q_A)+'b')
+	for mi in range(0,M):
+		if SR[mi] == '?':
+			continue
+		ppi = format(int(SR[mi]),'0'+str(Q_A)+'b')
 		for ppii in range(0,Q_A):
 			if ppi[ppii] == '1':	# Improve: '?' == '0' here
-				k.gate("x",Q_T+pi*Q_A+ppii)
+				k.gate("x",Q_T+mi*Q_A+ppii)
 
 ###################################################################################################
 
@@ -165,10 +167,15 @@ def Circ3(k,anc):
 
 	for Qi in range(0,Q_D):
 		k.gate("x",Q_T+Qi) 
-	k.gate("h",Q_T)
-	nc = [4,5,6,7,8]
-	nCX(k,nc,Q_T,anc)
-	k.gate("h",Q_T)
+	nc = []
+	for mi in range(0,M):
+		if SR[mi] != '?':
+			for ai in range(0,Q_A):
+				nc.append(Q_T+mi*Q_A+ai)
+	nt = nc.pop()
+	k.gate("h",nt)
+	nCX(k,nc,nt,anc)
+	k.gate("h",nt)
 	for Qi in range(0,Q_D):
 		k.gate("x",Q_T+Qi)
 
@@ -256,13 +263,13 @@ def CalcIter(r0,r1):
 	#print([Pmax,PmaxPapr])
 	
 	T = []
-	for j in range(0,9):
+	for j in range(0,20):
 		T.append(((j+0.5)*pi - atan(kavg*sqrt((r1+r0)/(N-r1-r0))/lavg))/acos(1-2*(r1+r0)/N))
 		print([j,T[j]])
 	# Improve: Pick T[j] with minimum round-off error (and justify)
 	jsel = 3
 
-	print([Pmax,T[jsel]])
+	print([Pmax/(r0+r1),T[jsel]])
 	print()
 
 	return round(T[jsel])

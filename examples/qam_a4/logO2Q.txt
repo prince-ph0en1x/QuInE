@@ -1,5 +1,18 @@
 [OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/program.h:209 writing un-scheduled qasm to 'test_output/qg.qasm' ...
 [OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
+[OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
+[OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
+[OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
+[OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
+[OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
+[OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
+[OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
+[OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
+[OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
+[OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
+[OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
+[OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
+[OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/scheduler.h:459 This digraph is not a DAG.
 [OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/program.h:319 writing scheduled qasm to 'test_output/qg_scheduled.qasm' ...
 [OPENQL] /media/aritra/DATA/GoogleDrive/TUD_CE/Thesis/SimQG/OpenQL/ql/program.h:216 Warning: no eqasm compiler has been specified in the configuration file, only qasm code has been compiled.
 ['000', '302']
@@ -10,3 +23,14 @@
 ['101', '102']
 ['110', '020']
 ['111', '203']
+[0, 2.787881005115189]
+[1, 6.175790909751763]
+[2, 9.563700814388337]
+[3, 12.951610719024911]
+[4, 16.339520623661485]
+[5, 19.727430528298054]
+[6, 23.11534043293463]
+[7, 26.503250337571203]
+[8, 29.89116024220778]
+[0.7974999999999999, 12.951610719024911]
+
