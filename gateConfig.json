@@ -3156,6 +3156,11 @@
       ]
     }
   }, 
+
+  "gate_decomposition":
+  {
+     "rz %0,%1" : ["x %0","rz90 %1"]
+  },
   "resources": {}, 
   "topology": {}
 }

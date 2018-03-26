@@ -1,7 +1,7 @@
 ## Reference: Quantum Associative Memory - D. Ventura
 ## arXiv: 
 
-## \date: 15-02-2018 - 27-02-2018
+## \date: 15-02-2018 - __-02-2018
 ## \repo: https://gitlab.com/prince-ph0en1x/QuInE
 ## \proj: Quantum-accelerated Genome-sequencing
 
@@ -67,83 +67,30 @@ def QBAM():
 	
 	config_fn = os.path.join('gateConfig.json')
 	platform = ql.Platform('platform_none', config_fn)
-	prog = ql.Program('qg', Q, platform)
-	
-	# Kernel 1: Construct Quantum Phone Directory
 
-	qk1 = ql.Kernel('QCirc1',platform)
-	Circ1(qk1,ancFactory[0])
-
-	# Kernel 2: Calculate Hamming Distances
-
-	qk2 = ql.Kernel('QCirc2',platform)
-	Circ2(qk2)
+	prog = ql.Program('qg', 2, platform)
 	
-	# Kernel 3: Oracle to Mark Hamming Distance of 0
+	qktest1 = ql.Kernel('QTest1',platform)
+	Test1(qktest1,[0,1])
+	prog.add_kernel(qktest1)
+	del qktest1
+	qktest1 = ql.Kernel('QTest1',platform)
+	Test1(qktest1,[1,0])
+	prog.add_kernel(qktest1)
 	
-	qk3 = ql.Kernel('QCirc3',platform)
-	Circ3(qk3,ancFactory[0])
-
-	# Kernel 4: Amplitude Amplification
-	
-	qk4 = ql.Kernel('QCirc4',platform)
-	Circ4(qk4,ancFactory[0])
-
-	# Kernel 5: Oracle to Mark All Stored Patterns
-	
-	qk5 = ql.Kernel('QCirc5',platform)
-	Circ5(qk5,ancFactory[0])  
-	
-	# Construct Program from Kernels
-	
-	prog.add_kernel(qk1)
-	prog.add_kernel(qk2)
-	prog.add_kernel(qk3)
-	prog.add_kernel(qk4)
-	
-	prog.add_kernel(qk2)
-	prog.add_kernel(qk5)
-	prog.add_kernel(qk2)
-	prog.add_kernel(qk4)
-
-	T = CalcIter(0,2)
-
-	for i in range(0,T):
-		prog.add_kernel(qk3)
-		prog.add_kernel(qk4)
-	
-	prog.compile(False, "ASAP", False)
+	prog.compile(True, "ALAP", True)
 	display()
 	#showQasm(1)
 
 ###################################################################################################
 
-# Kernel 1: Construct Quantum Phone Directory
+# Kernel 1: Test Kernel to Qubit association and Compile Optimisations
 
-def Circ1(k,anc):
+def Test1(k,anc):
 
-	for Qi in range(0,Q):
-		k.prepz(Qi)
-	for Qi in range(0,Q_T):
-		k.gate("h",Qi)
-	nc = []
-	for ci in range(0,Q_T):
-		nc.append(ci)
-	for Qi in range(0,N-M+1):
-		Qis = format(Qi,'0'+str(Q_T)+'b')
-		for Qisi in range(0,Q_T):
-			if Qis[Qisi] == '0':
-				k.gate("x",Qisi)
-		wMi = RG[Qi:Qi+M]
-		print([Qis,wMi])
-		for wisi in range(0,M):
-			wisia = format(int(wMi[wisi]),'0'+str(Q_A)+'b')
-			for wisiai in range(0,Q_A):
-				if wisia[wisiai] == '1':
-					nCX(k,nc,Q_T+wisi*Q_A+wisiai,anc)
-		for Qisi in range(0,Q_T):
-			if Qis[Qisi] == '0':
-				k.gate("x",Qisi)
+	k.gate("x",anc[0])
+	k.gate("x",anc[1])
+
 
 ###################################################################################################
 

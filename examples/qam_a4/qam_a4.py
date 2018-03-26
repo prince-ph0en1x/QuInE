@@ -46,7 +46,7 @@ python3 examples/qam_a4/qam_a4.py
 AS = {'0','1','2','3'}	# Alphabet Set {0,1,2,3} := {A,C,G,T} for DNA Nucleotide bases
 A = len(AS)
 
-RG = "3020310203"		# Reference Genome string
+RG = "3020310211"		# Reference Genome string
 N = len(RG)
 
 SR = "203"				# Short Read search string

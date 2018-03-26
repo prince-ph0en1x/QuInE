@@ -11,25 +11,18 @@
   [released under Apache License 2.0 terms, license copy at:  http://www.apache.org/licenses/LICENSE-2.0]
   ======================================================================================================= 
 
-[+] loading circuit from '/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/circtest/circtest.qasm' ...
-[-] loading quantum_code file '/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/circtest/circtest.qasm'...
+[+] loading circuit from '/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/test_openql/test_openql.qasm' ...
+[-] loading quantum_code file '/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/test_openql/test_openql.qasm'...
 [+] code loaded successfully. 
 [+] initializing xpu...
 [+] initialized.
-[+] creating quantum register of 6 qubits... 
-[+] executing circuit 'default' (1 iter) ...
+[+] creating quantum register of 10 qubits... 
+[+] executing circuit 'qtest1' (1 iter) ...
 --------------[quantum state]-------------- 
-   (-0.353553,+0.000000) |000011> +
-   (+0.353553,+0.000000) |000110> +
-   (+0.353553,+0.000000) |001001> +
-   (+0.353553,+0.000000) |001100> +
-   (-0.353553,+0.000000) |010010> +
-   (+0.353553,+0.000000) |010111> +
-   (+0.353553,+0.000000) |011000> +
-   (+0.353553,+0.000000) |011101> +
+   (+1.000000,+0.000000) |0000000000> +
 ------------------------------------------- 
-[>>] measurement prediction:  | 0 | X | X | X | X | X |
+[>>] measurement prediction:  | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 ------------------------------------------- 
-[>>] measurement register  :  | 0 | 0 | 0 | 0 | 0 | 0 |
+[>>] measurement register  :  | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 ------------------------------------------- 
-[+] circuit execution time: +0.001274 sec.
+[+] circuit execution time: +0.000415 sec.

@@ -11,8 +11,8 @@
   [released under Apache License 2.0 terms, license copy at:  http://www.apache.org/licenses/LICENSE-2.0]
   ======================================================================================================= 
 
-[+] loading circuit from '/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/circtest/circtest.qasm' ...
-[-] loading quantum_code file '/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/circtest/circtest.qasm'...
+[+] loading circuit from '/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qamwd_a2/qamwd_a2.qcir' ...
+[-] loading quantum_code file '/mnt/7A06EEA206EE5E9F/GoogleDrive/TUD_CE/Thesis/SimQG/QuInE/examples/qamwd_a2/qamwd_a2.qcir'...
 [+] code loaded successfully. 
 [+] initializing xpu...
 [+] initialized.
@@ -32,4 +32,4 @@
 ------------------------------------------- 
 [>>] measurement register  :  | 0 | 0 | 0 | 0 | 0 | 0 |
 ------------------------------------------- 
-[+] circuit execution time: +0.001274 sec.
+[+] circuit execution time: +0.003763 sec.

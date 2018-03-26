@@ -1,7 +1,7 @@
 ## Reference: Quantum Associative Memory - D. Ventura
 ## arXiv: 
 
-## \date: 15-02-2018 - 27-02-2018
+## \date: 20-03-2018 - __-03-2018
 ## \repo: https://gitlab.com/prince-ph0en1x/QuInE
 ## \proj: Quantum-accelerated Genome-sequencing
 
@@ -18,12 +18,12 @@
 		Evolve patterns to Hamming Distances
 		Multiple (known) 0 states
 		Find optimal number of iterations T
-		Mark 0 states
+		Mark Binomial 0 states
 		AA
 		Mark all stored states
 		AA
 		T times
-			Mark 0 states
+			Mark Binomial 0 states
 			AA
 		Solve completion problem by measuring Tag bits of QBAM
 '''
@@ -43,19 +43,19 @@ python3 examples/qam_a4/qam_a4.py
 
 ###################################################################################################
 
-AS = {'0','1','2','3'}	# Alphabet Set {0,1,2,3} := {A,C,G,T} for DNA Nucleotide bases
+AS = {'0','1'}
 A = len(AS)
 
-RG = "3020310213"		# Reference Genome string
+RG = "3020310211"		# Reference Genome string
 N = len(RG)
 
-SR = "2?3"				# Short Read search string
+SR = "000"				# Short Read search string
 # dummyp = "000"		# indices out of range will be tagged with dummyp data
 M = len(SR)
 
 Q_A = ceil(log2(A))
 Q_D = Q_A * M			# Data Qubits
-Q_T = ceil(log2(N-M+1))	# Tag Qubits 
+Q_T = 3	#ceil(log2(N-M+1))	# Tag Qubits 
 
 Q_anc = 1				# Ancilla Qubits
 ancFactory = [Q_D+Q_T]
@@ -64,22 +64,23 @@ Q = Q_D + Q_T + Q_anc
 ###################################################################################################
 	
 def QBAM():
-	
+	print(Q)
 	config_fn = os.path.join('gateConfig.json')
 	platform = ql.Platform('platform_none', config_fn)
 	prog = ql.Program('qg', Q, platform)
 	
 	# Kernel 1: Construct Quantum Phone Directory
-
+	
 	qk1 = ql.Kernel('QCirc1',platform)
 	Circ1(qk1,ancFactory[0])
-
+	
+	'''
 	# Kernel 2: Calculate Hamming Distances
 
 	qk2 = ql.Kernel('QCirc2',platform)
 	Circ2(qk2)
-	
-	# Kernel 3: Oracle to Mark Hamming Distance of 0
+	'''
+	# Kernel 3: Oracle for Distributed Binomial Query with centre at 0
 	
 	qk3 = ql.Kernel('QCirc3',platform)
 	Circ3(qk3,ancFactory[0])
@@ -93,26 +94,28 @@ def QBAM():
 	
 	qk5 = ql.Kernel('QCirc5',platform)
 	Circ5(qk5,ancFactory[0])  
-	
+
 	# Construct Program from Kernels
 	
-	prog.add_kernel(qk1)
-	prog.add_kernel(qk2)
+	#prog.add_kernel(qk1)
+	#prog.add_kernel(qk2)
+
 	prog.add_kernel(qk3)
+	'''
 	prog.add_kernel(qk4)
 	
-	prog.add_kernel(qk2)
+	#prog.add_kernel(qk2)
 	prog.add_kernel(qk5)
-	prog.add_kernel(qk2)
+	#prog.add_kernel(qk2)
 	prog.add_kernel(qk4)
 
-	T = CalcIter(0,2)
+	T = 6;	#CalcIter(0,2)
 
 	for i in range(0,T):
 		prog.add_kernel(qk3)
 		prog.add_kernel(qk4)
-	
-	prog.compile(False, "ASAP", False)
+	'''
+	prog.compile(False, "ASAP")
 	display()
 	#showQasm(1)
 
@@ -131,11 +134,14 @@ def Circ1(k,anc):
 		nc.append(ci)
 	for Qi in range(0,N-M+1):
 		Qis = format(Qi,'0'+str(Q_T)+'b')
+		if (Qis == '000' or Qis == '001'):		# Not present in Memory
+			wMi = '111'						# Maximum distance from SR
+		else:
+			wMi = Qis
+		print([Qis,wMi])
 		for Qisi in range(0,Q_T):
 			if Qis[Qisi] == '0':
 				k.gate("x",Qisi)
-		wMi = RG[Qi:Qi+M]
-		print([Qis,wMi])
 		for wisi in range(0,M):
 			wisia = format(int(wMi[wisi]),'0'+str(Q_A)+'b')
 			for wisiai in range(0,Q_A):
@@ -151,33 +157,31 @@ def Circ1(k,anc):
 
 def Circ2(k):
 
-	for mi in range(0,M):
-		if SR[mi] == '?':
-			continue
-		ppi = format(int(SR[mi]),'0'+str(Q_A)+'b')
+	for pi in range(0,M):
+		ppi = format(int(SR[pi]),'0'+str(Q_A)+'b')
 		for ppii in range(0,Q_A):
 			if ppi[ppii] == '1':	# Improve: '?' == '0' here
-				k.gate("x",Q_T+mi*Q_A+ppii)
+				k.gate("x",Q_T+pi*Q_A+ppii)
 
 ###################################################################################################
 
 # Kernel 3: Oracle to Mark Hamming Distance of 0
 
 def Circ3(k,anc):
-
+	#k.gate("rz",0,-3.141593)
+	#k.gate("x",0)
+	#k.gate("x",0)
+	k.ry(0,3.141593)
+	'''
 	for Qi in range(0,Q_D):
 		k.gate("x",Q_T+Qi) 
-	nc = []
-	for mi in range(0,M):
-		if SR[mi] != '?':
-			for ai in range(0,Q_A):
-				nc.append(Q_T+mi*Q_A+ai)
-	nt = nc.pop()
-	k.gate("h",nt)
-	nCX(k,nc,nt,anc)
-	k.gate("h",nt)
+	k.gate("h",Q_T)
+	nc = [4,5,6,7,8]
+	nCX(k,nc,Q_T,anc)
+	k.gate("h",Q_T)
 	for Qi in range(0,Q_D):
 		k.gate("x",Q_T+Qi)
+	'''
 
 ###################################################################################################
 
@@ -207,29 +211,34 @@ def Circ5(k,anc):
 	nc = []
 	for ci in range(1,Q_T+Q_D):
 		nc.append(ci)
+	print(nc)
 	for Qi in range(0,N-M+1):
 		Qis = format(Qi,'0'+str(Q_T)+'b')
-		for Qisi in range(0,Q_T):
-			if Qis[Qisi] == '0':
-				k.gate("x",Qisi)
-		wMi = RG[Qi:Qi+M]
-		for wisi in range(0,M):
-			wisia = format(int(wMi[wisi]),'0'+str(Q_A)+'b')
-			for wisiai in range(0,Q_A):
-				if wisia[wisiai] == '0':
-					k.gate("x",Q_T+wisi*Q_A+wisiai)
-		k.gate("h",0)
-		nCX(k,nc,0,anc)
-		k.gate("h",0)
-		for wisi in range(0,M):
-			wisia = format(int(wMi[wisi]),'0'+str(Q_A)+'b')
-			for wisiai in range(0,Q_A):
-				if wisia[wisiai] == '0':
-					k.gate("x",Q_T+wisi*Q_A+wisiai)
-		for Qisi in range(0,Q_T):
-			if Qis[Qisi] == '0':
-				k.gate("x",Qisi)
-
+		if (Qis == '000' or Qis == '001'):		# Not present in Memory
+			continue
+		else:
+			for Qisi in range(0,Q_T):
+				if Qis[Qisi] == '0':
+						k.gate("x",Qisi)
+			wMi = Qis
+			print([Qis, wMi])
+			for wisi in range(0,M):
+				wisia = format(int(wMi[wisi]),'0'+str(Q_A)+'b')
+				for wisiai in range(0,Q_A):
+					if wisia[wisiai] == '0':
+						k.gate("x",Q_T+wisi*Q_A+wisiai)
+			k.gate("h",0)
+			nCX(k,nc,0,anc)
+			k.gate("h",0)
+			for wisi in range(0,M):
+				wisia = format(int(wMi[wisi]),'0'+str(Q_A)+'b')
+				for wisiai in range(0,Q_A):
+					if wisia[wisiai] == '0':
+						k.gate("x",Q_T+wisi*Q_A+wisiai)
+			for Qisi in range(0,Q_T):
+				if Qis[Qisi] == '0':
+					k.gate("x",Qisi)
+	
 ###################################################################################################
 
 # Finding optimal iterations for known arbitrary initial amplitude distribution
@@ -263,13 +272,13 @@ def CalcIter(r0,r1):
 	#print([Pmax,PmaxPapr])
 	
 	T = []
-	for j in range(0,20):
+	for j in range(0,9):
 		T.append(((j+0.5)*pi - atan(kavg*sqrt((r1+r0)/(N-r1-r0))/lavg))/acos(1-2*(r1+r0)/N))
 		print([j,T[j]])
 	# Improve: Pick T[j] with minimum round-off error (and justify)
 	jsel = 3
 
-	print([Pmax/(r0+r1),T[jsel]])
+	print([Pmax,T[jsel]])
 	print()
 
 	return round(T[jsel])
