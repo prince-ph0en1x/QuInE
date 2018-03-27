@@ -1,26 +1,15 @@
-qubits 6
+qubits 3
+
 h q0
-h q1
-x q0
-x q1
-toffoli q0,q1,q2
-toffoli q0,q1,q3
-x q0
-x q1
-x q0
-toffoli q0,q1,q2
-x q0
-x q1
-toffoli q0,q1,q3
-x q1
-h q4
-cnot q4,q2
-cnot q5,q3
-x q2
-x q3
-h q3
-cnot q2,q3
-h q3
-x q2
-x q3
+
+cnot q1,q2
+cnot q2,q1
+cnot q1,q2
+
+ry q2,-1.14
+
+cnot q1,q2
+cnot q2,q1
+cnot q1,q2
+
 display
