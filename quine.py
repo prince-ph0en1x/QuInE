@@ -167,13 +167,14 @@ class Window(QtGui.QMainWindow):
 	def openProject(self):
 
 		self.configProjJson = QtGui.QFileDialog.getOpenFileName(self,'Open QuIDE Project File','',"*.qide")
-		with open(self.configProjJson) as file:
-			self.configProj = json.load(file)
-		file.close()
-		self.dirProj = self.configProj['path']
-		self.nameProj = self.configProj['name']
+		print(self.configProjJson)
+		pathCnfg = str(self.configProjJson)
+		self.dirProj = pathCnfg[:pathCnfg.rindex('/')]
+		nameCnfg = pathCnfg[pathCnfg.rindex('/')+1:]
+		self.nameProj = nameCnfg[:nameCnfg.rindex('.')]	
+		self.configProj = {'name':self.nameProj}
+		self.configProj.update({'path':self.dirProj})
 		self.centerLayout()
-
 		self.openOpenql()
 		self.openQasm()
 		self.openQcirc()
