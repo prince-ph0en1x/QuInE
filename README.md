@@ -28,4 +28,9 @@ Unlease the power of OpenQL and QX-Sim for large-scale Quantum Algorithm Develop
 * Apache 2 License
 * Cross-platform design in PyQt4
 * Layout based QCirc designing (TBD)
+* PyPi install (TBD)
+* GUI smoother resizing (TBD)
+* MacOS support (TBD)
+* cQASM 1.0 testing (TBD)
+* Q&CE ssh server (TBD)
 * Under active development for Alpha release: suggestions are welcome
