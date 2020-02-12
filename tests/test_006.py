@@ -5,7 +5,10 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 
 import os
 
-PATH_QX = '/media/sf_QWorld/dev_tools_QCA/qx-simulator-bug-ckt-accumulation-qxelerator-72/build/bin/qx-simulator'
+# PATH_QX = '/media/sf_QWorld/dev_tools_QCA/qx-simulator-bug-ckt-accumulation-qxelerator-72/build/bin/qx-simulator'
+test_path = os.path.dirname(os.path.realpath(__file__))						# Get the path of this python code file
+quine_path = os.path.dirname(test_path)
+PATH_QX = os.path.join(quine_path, 'qx-simulator')
 
 class Window(QtWidgets.QMainWindow):
 		

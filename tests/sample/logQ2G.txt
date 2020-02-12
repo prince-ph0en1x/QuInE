@@ -22,4 +22,4 @@
 ------------------------------------------- 
 [>>] measurement register                 :  |         0 |         0 |
 ------------------------------------------- 
-[+] circuit execution time: +0.036531 sec.
+[+] circuit execution time: +0.032989 sec.
