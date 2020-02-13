@@ -1,4 +1,10 @@
-# Test qasm execution
+# Test help and dev menu
+
+# TBD
+'''
+* Window resize dynamic
+* Minimum button size 30x30
+'''
 
 import sys
 from PyQt5 import QtWidgets, QtGui, QtCore
@@ -9,6 +15,8 @@ import os
 test_path = os.path.dirname(os.path.realpath(__file__))						# Get the path of this python code file
 quine_path = os.path.dirname(test_path)
 PATH_QX = os.path.join(quine_path, 'qx-simulator')
+
+USER_MODE = True
 
 class Window(QtWidgets.QMainWindow):
 		
@@ -41,8 +49,17 @@ class Window(QtWidgets.QMainWindow):
 	def menu(self):
 
 		self.mainMenu = self.menuBar()
+		
 		self.menuFile = self.mainMenu.addMenu('&File')
 		self.fileMenu()
+		
+		self.menuHelp = self.mainMenu.addMenu('&Help')
+		self.helpMenu()
+		
+		self.menuDev = self.mainMenu.addMenu('&Nightly Sandbox')
+		self.devMenu()
+		if USER_MODE:
+			self.menuDev.setEnabled(False)
 
 	#~~~~~~~~~~~~~~~~~~~~~~~~~ file menu ~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -75,11 +92,70 @@ class Window(QtWidgets.QMainWindow):
 
 	def newProject(self):
 		self.centerLayout()
-# 
 
 	def openProject(self):
 		return
 
+
+	#~~~~~~~~~~~~~~~~~~~~~~~~~ help menu ~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+	def helpMenu(self):
+
+		self.menuHelpTutorial = QtWidgets.QMenu("&Learn",self)
+		self.menuHelp.addMenu(self.menuHelpTutorial)
+
+		qtactn = QtWidgets.QAction("&OpenQL",self.menuHelpTutorial)
+		qtactn.triggered.connect(self.learnOpenql)
+		self.menuHelpTutorial.addAction(qtactn)
+
+		qtactn = QtWidgets.QAction("&QX simulator",self.menuHelpTutorial)
+		qtactn.triggered.connect(self.learnQxsim)
+		self.menuHelpTutorial.addAction(qtactn)
+
+		self.menuHelp.addSeparator()
+		
+		self.menuHelpLicense = QtWidgets.QAction("&License",self)
+		self.menuHelpLicense.triggered.connect(self.license)
+		self.menuHelp.addAction(self.menuHelpLicense)
+		
+		self.menuHelpUpdate = QtWidgets.QAction("&Update",self)
+		# self.menuHelpUpdate.triggered.connect(self.TBD)
+		self.menuHelp.addAction(self.menuHelpUpdate)
+		self.menuHelpUpdate.setEnabled(False)
+		
+		self.menuHelpAbout = QtWidgets.QAction("&About",self)
+		self.menuHelpAbout.triggered.connect(self.about)
+		self.menuHelp.addAction(self.menuHelpAbout)
+
+	def learnOpenql(self):
+
+		QtWidgets.QMessageBox.about(self,"Learn OpenQL","Visit : https://openql.readthedocs.io")
+
+	def learnQxsim(self):
+
+		QtWidgets.QMessageBox.about(self,"Learn QX simulator","Visit : https://github.com/QE-Lab/qx-simulator")
+
+	def license(self):
+
+		QtWidgets.QMessageBox.about(self,"License",open("license.txt",'r').read())
+
+	def about(self):
+
+		QtWidgets.QMessageBox.about(self,"About",open("about.txt",'r').read())
+
+	#~~~~~~~~~~~~~~~~~~~~~~~~~ dev menu ~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+	# features under development can be accessed from here
+
+	def devMenu(self):
+
+		self.menuDevThemes = QtWidgets.QMenu("&Themes",self)
+		self.menuDev.addMenu(self.menuDevThemes)
+
+		for style in QtWidgets.QStyleFactory.keys():
+			qtStyle = QtWidgets.QAction(style,self.menuDevThemes)
+			qtStyle.triggered.connect((lambda styleName: lambda: QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create(styleName)))(style))
+			self.menuDevThemes.addAction(qtStyle)
 
 	########################## MAIN LAYOUT ##########################
 

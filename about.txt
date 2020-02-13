@@ -1,5 +1,5 @@
-This is a project developed by Aritra Sarkar to integrate OpenQL and QX-Sim into a single integrated development environment.
+This project is developed by Aritra Sarkar to integrate OpenQL and QX simulator into a single integrated development environment for application development using quantum accelerators.
 
-For suggestions and bug reports, use the GitLab page at:
+For suggestions and bug reports, visit the GitHub page at:
 
-https://gitlab.com/prince-ph0en1x/QIDE
+https://github.com/prince-ph0en1x/QuInE
