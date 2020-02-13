@@ -4,6 +4,7 @@
 '''
 * Window resize dynamic
 * Minimum button size 30x30
+* Stop quickaddess duplication
 '''
 
 import sys
@@ -40,7 +41,9 @@ class Window(QtWidgets.QMainWindow):
 		self.stsmsg = self.statusBar()
 		self.stsmsg.showMessage('Create new project or Open existing project')
 
-		self.saved = 0
+		self.layout = False
+		self.saved = 1
+
 		self.menu()
 		
 		self.show()
@@ -62,6 +65,8 @@ class Window(QtWidgets.QMainWindow):
 		if USER_MODE:
 			self.menuDev.setEnabled(False)
 
+			
+
 	#~~~~~~~~~~~~~~~~~~~~~~~~~ file menu ~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 	def fileMenu(self):
@@ -82,6 +87,8 @@ class Window(QtWidgets.QMainWindow):
 		self.menuFile.addAction(self.menuFileSaveProj)
 		self.menuFileSaveProj.setEnabled(False)
 
+		# Save sources: qasm ,openql, qcirc
+
 		self.menuFileCloseProj = QtWidgets.QAction("&Close Project",self)
 		# self.menuFileSaveP.setShortcut("Ctrl+X")
 		self.menuFileCloseProj.triggered.connect(self.closeProject)
@@ -90,42 +97,59 @@ class Window(QtWidgets.QMainWindow):
 
 		self.menuFile.addSeparator()
 
-		self.menuFileOpenO = QtWidgets.QAction("&Set OpenQL",self)
+		self.menuFileNewO = QtWidgets.QAction("&New OpenQL",self)
 		# self.menuFileOpenO.triggered.connect(self.importOpenql)
-		self.menuFile.addAction(self.menuFileOpenO)
-		self.menuFileOpenO.setEnabled(False)
+		self.menuFile.addAction(self.menuFileNewO)
+		self.menuFileNewO.setEnabled(False)
 
-		self.menuFileOpenQ = QtWidgets.QAction("&Set cQASM",self)
-		self.menuFileOpenQ.triggered.connect(self.importQasm)
-		self.menuFile.addAction(self.menuFileOpenQ)
-		self.menuFileOpenQ.setEnabled(False)
+		self.menuFileNewQ = QtWidgets.QAction("&New cQASM",self)
+		self.menuFileNewQ.triggered.connect(self.createQasm)
+		self.menuFile.addAction(self.menuFileNewQ)
+		self.menuFileNewQ.setEnabled(False)
 
-		self.menuFileOpenC = QtWidgets.QAction("&Set QCircuit",self)
+		self.menuFileNewC = QtWidgets.QAction("&New QCircuit",self)
 		# self.menuFileOpenC.triggered.connect(self.TBD)
-		self.menuFile.addAction(self.menuFileOpenC)
-		self.menuFileOpenC.setEnabled(False)
+		self.menuFile.addAction(self.menuFileNewC)
+		self.menuFileNewC.setEnabled(False)
 
 		self.menuFile.addSeparator()
 
-		# self.menuFileSaveO = QtWidgets.QAction("&Export OpenQL",self)
+		self.menuFileImportO = QtWidgets.QAction("&Import OpenQL",self)
+		# self.menuFileOpenO.triggered.connect(self.importOpenql)
+		self.menuFile.addAction(self.menuFileImportO)
+		self.menuFileImportO.setEnabled(False)
+
+		self.menuFileImportQ = QtWidgets.QAction("&Import cQASM",self)
+		self.menuFileImportQ.triggered.connect(self.importQasm)
+		self.menuFile.addAction(self.menuFileImportQ)
+		self.menuFileImportQ.setEnabled(False)
+
+		self.menuFileImportC = QtWidgets.QAction("&Import QCircuit",self)
+		# self.menuFileOpenC.triggered.connect(self.TBD)
+		self.menuFile.addAction(self.menuFileImportC)
+		self.menuFileImportC.setEnabled(False)
+
+		self.menuFile.addSeparator()
+
+		self.menuFileSaveO = QtWidgets.QAction("&Save OpenQL",self)
 		# self.menuFileSaveO.triggered.connect(self.exportOpenql)
-		# self.menuFile.addAction(self.menuFileSaveO)
-		# self.menuFileSaveO.setEnabled(False)
+		self.menuFile.addAction(self.menuFileSaveO)
+		self.menuFileSaveO.setEnabled(False)
 
-		# self.menuFileSaveQ = QtWidgets.QAction("&Export QASM",self)
-		# self.menuFileSaveQ.triggered.connect(self.exportQasm)
-		# self.menuFile.addAction(self.menuFileSaveQ)
-		# self.menuFileSaveQ.setEnabled(False)
+		self.menuFileSaveQ = QtWidgets.QAction("&Save cQASM",self)
+		self.menuFileSaveQ.triggered.connect(self.exportQasm)
+		self.menuFile.addAction(self.menuFileSaveQ)
+		self.menuFileSaveQ.setEnabled(False)
 
-		# self.menuFileSaveC = QtWidgets.QAction("&Export QCircuit",self)
+		self.menuFileSaveC = QtWidgets.QAction("&Save QCircuit",self)
 		# self.menuFileSaveC.triggered.connect(self.TBD)
-		# self.menuFile.addAction(self.menuFileSaveC)
-		# self.menuFileSaveC.setEnabled(False)							# (TBD)
+		self.menuFile.addAction(self.menuFileSaveC)
+		self.menuFileSaveC.setEnabled(False)
 
-		# self.menuFileExport = QtWidgets.QAction("&Export QCircuit Image",self)
+		self.menuFileExport = QtWidgets.QAction("&Export Circuit Image",self)
 		# self.menuFileExport.triggered.connect(self.exportQCircImg)
-		# self.menuFile.addAction(self.menuFileExport)
-		# self.menuFileExport.setEnabled(False)
+		self.menuFile.addAction(self.menuFileExport)
+		self.menuFileExport.setEnabled(False)
 
 		self.menuFile.addSeparator()
 
@@ -135,12 +159,17 @@ class Window(QtWidgets.QMainWindow):
 		self.menuFile.addAction(self.menuFileExit)
 
 	def closeApp(self):
+
 		if self.saved == 0:
 			choice = QtWidgets.QMessageBox.question(self,'sanity check',"You have unsaved progress. Are you sure you want to quit?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
 			if choice == QtWidgets.QMessageBox.Yes:
 				sys.exit()
 			else:
 				pass
+		else:
+			sys.exit()
+
+	#~~~~~~~~~~~~~~~~~~~~~~~~~ Project functions ~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 	def newProject(self):
 
@@ -151,8 +180,27 @@ class Window(QtWidgets.QMainWindow):
 			with open(self.nameProj,'w') as file:
 				json.dump(self.cnfgProj,file,indent=2)
 			file.close()
-		
-			self.centerLayout()
+
+			self.menuFileSaveProj.setEnabled(True)
+			self.menuFileCloseProj.setEnabled(True)
+
+			# self.menuFileNewO.setEnabled(True)
+			self.menuFileNewQ.setEnabled(True)
+			# self.menuFileNewC.setEnabled(True)
+
+			# self.menuFileImportO.setEnabled(True)
+			self.menuFileImportQ.setEnabled(True)
+			# self.menuFileImportC.setEnabled(True)
+
+			# self.menuFileSaveO.setEnabled(True)
+			self.menuFileSaveQ.setEnabled(True)
+			# self.menuFileSaveC.setEnabled(True)
+
+			if self.layout == False:
+				self.centerLayout()
+				self.layout = True
+
+			self.saved = 0
 
 	def openProject(self):
 
@@ -162,15 +210,35 @@ class Window(QtWidgets.QMainWindow):
 				self.cnfgProj = json.load(file)
 			file.close()
 
-			self.centerLayout()
+			self.menuFileSaveProj.setEnabled(True)
+			self.menuFileCloseProj.setEnabled(True)
+
+			# self.menuFileNewO.setEnabled(True)
+			self.menuFileNewQ.setEnabled(True)
+			# self.menuFileNewC.setEnabled(True)
+
+			# self.menuFileImportO.setEnabled(True)
+			self.menuFileImportQ.setEnabled(True)
+			# self.menuFileImportC.setEnabled(True)
+
+			# self.menuFileSaveO.setEnabled(True)
+			self.menuFileSaveQ.setEnabled(True)
+			# self.menuFileSaveC.setEnabled(True)
+
+			if self.layout == False:
+				self.centerLayout()
+				self.layout = True
 
 			# self.openOpenql()
-			self.openQasm()
+			if 'name_cqasm' in self.cnfgProj.keys():
+				self.openQasm()
 			# self.openQcirc()
+
+			self.saved = 0
 
 	def saveProject(self):
 
-		with open(self.nameProj,'w') as file:
+		with open(self.cnfgProj['name'],'w') as file:
 			json.dump(self.cnfgProj,file,indent=2)
 		file.close()
 
@@ -183,21 +251,42 @@ class Window(QtWidgets.QMainWindow):
 		self.menuFileSaveProj.setEnabled(False)
 		self.menuFileCloseProj.setEnabled(False)
 
-		self.menuFileOpenQ.setEnabled(False)
+		# self.menuFileNewO.setEnabled(False)
+		self.menuFileNewQ.setEnabled(False)
+		# self.menuFileNewC.setEnabled(False)
 
-		# Remove layout
+		# self.menuFileImportO.setEnabled(False)
+		self.menuFileImportQ.setEnabled(False)
+		# self.menuFileImportC.setEnabled(False)
+
+		# self.menuFileSaveO.setEnabled(False)
+		self.menuFileSaveQ.setEnabled(False)
+		# self.menuFileSaveC.setEnabled(False)
+
+		self.textQasm.setText("QASM Editor")
+		self.textQasm.setEnabled(False)
+
+		self.textLog.setText("Run Logs")
+		self.textLog.setEnabled(False)
+
+		self.btnQ2G.setEnabled(False)
+
+		self.saved = 1
+
+	#~~~~~~~~~~~~~~~~~~~~~~~~~ cQASM functions ~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 	def importQasm(self):
 
 		self.fileCqasm, _ = QtWidgets.QFileDialog.getOpenFileName(self,'Import cQASM File','',"*.qasm")
-		with open(self.fileCqasm,'r') as file:
-			text = file.read()
-			self.textQasm.setText(text)
-		self.cnfgProj.update({'name_cqasm':self.fileCqasm})
+		if self.fileCqasm != "":
+			with open(self.fileCqasm,'r') as file:
+				text = file.read()
+				self.textQasm.setText(text)
+			self.cnfgProj.update({'name_cqasm':self.fileCqasm})
 
-		self.textQasm.setEnabled(True)
-		self.btnQ2G.setEnabled(True)
-		# self.btnC2Q.setEnabled(False)
+			self.textQasm.setEnabled(True)
+			self.btnQ2G.setEnabled(True)
+			# self.btnC2Q.setEnabled(False)
 
 	def openQasm(self):
 
@@ -207,6 +296,29 @@ class Window(QtWidgets.QMainWindow):
 		with open(self.cnfgProj['name_cqasm'],'r') as file:
 			text = file.read()
 			self.textQasm.setText(text)
+
+	def createQasm(self):
+
+		self.fileCqasm, _ = QtWidgets.QFileDialog.getSaveFileName(self,'Import cQASM File','',"*.qasm")
+		if self.fileCqasm != "":
+			self.cnfgProj.update({'name_cqasm':self.fileCqasm})
+
+			self.textQasm.setEnabled(True)
+			self.btnQ2G.setEnabled(True)
+			# self.btnC2Q.setEnabled(False)		
+
+	def exportQasm(self):
+		
+		if not 'name_cqasm' in self.cnfgProj.keys():
+			self.fileCqasm, _ = QtWidgets.QFileDialog.getSaveFileName(self,'Export cQASM File','',"*.qasm")
+			if self.fileCqasm != "":
+				self.cnfgProj.update({'name_cqasm':self.fileCqasm})
+
+		if 'name_cqasm' in self.cnfgProj.keys():
+			file = open(self.cnfgProj['name_cqasm'],'w')
+			text = self.textQasm.toPlainText()
+			file.write(text)
+			file.close()
 
 	#~~~~~~~~~~~~~~~~~~~~~~~~~ help menu ~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -272,15 +384,8 @@ class Window(QtWidgets.QMainWindow):
 
 	def centerLayout(self):
 
-		self.menuFileSaveProj.setEnabled(True)
-		self.menuFileCloseProj.setEnabled(True)
+		self.quickaccess()	
 
-		self.menuFileOpenO.setEnabled(True)
-		self.menuFileOpenQ.setEnabled(True)
-		self.menuFileOpenC.setEnabled(True)
-
-		self.quickaccess()
-		
 		self.centralWidget = QtWidgets.QWidget(self)
 		self.setCentralWidget(self.centralWidget)
 		self.topLayoutV = QtWidgets.QVBoxLayout(self.centralWidget)
@@ -294,28 +399,6 @@ class Window(QtWidgets.QMainWindow):
 		self.topLayoutH2 = QtWidgets.QHBoxLayout()
 		self.resultTabs()     
 		self.topLayoutV.addLayout(self.topLayoutH2)
-
-	# def centerLayout(self):
-
-	# 	self.quickaccess()
-	# 	self.menuFileSaveProj.setEnabled(True)
-	# 	self.menuFileCloseProj.setEnabled(True)
-
-	# 	self.menuFileOpenQ.setEnabled(True)
-		
-	# 	self.centralWidget = QtWidgets.QWidget(self)
-	# 	self.setCentralWidget(self.centralWidget)
-	# 	self.topLayoutV = QtWidgets.QVBoxLayout(self.centralWidget)
-		
-	# 	self.topLayoutH1 = QtWidgets.QHBoxLayout()
-	# 	self.topLayoutH1.addSpacing(self.win_cx*0.05) # Indent for circuit palate
-	# 	self.openqlEditor()
-	# 	self.qasmEditor()
-	# 	self.topLayoutV.addLayout(self.topLayoutH1)
-		
-	# 	self.topLayoutH2 = QtWidgets.QHBoxLayout()
-	# 	self.resultTabs()     
-	# 	self.topLayoutV.addLayout(self.topLayoutH2)
 
 	#~~~~~~~~~~~~~~~~~~~~~~~~~ shortcuts ~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -397,6 +480,7 @@ class Window(QtWidgets.QMainWindow):
 		self.textQasm.setFixedSize(self.win_cx*0.35,self.win_ry*0.45)
 		self.textQasm.setText("QASM Editor")
 		self.textQasm.setLineWrapMode(0)
+		# self.highlight = syntax.PythonHighlighter(self.textOpenql.document()) TBD
 		self.qasmLayout.addWidget(self.textQasm)
 		self.textQasm.setEnabled(False)
 
