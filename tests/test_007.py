@@ -1,4 +1,4 @@
-# Test help and dev menu
+# Test help menu, dev menu and quick access
 
 # TBD
 '''
@@ -161,6 +161,8 @@ class Window(QtWidgets.QMainWindow):
 
 	def centerLayout(self):
 
+		self.quickaccess()
+		
 		self.centralWidget = QtWidgets.QWidget(self)
 		self.setCentralWidget(self.centralWidget)
 		self.topLayoutV = QtWidgets.QVBoxLayout(self.centralWidget)
@@ -175,6 +177,28 @@ class Window(QtWidgets.QMainWindow):
 		self.resultTabs()     
 		self.topLayoutV.addLayout(self.topLayoutH2)
 
+	#~~~~~~~~~~~~~~~~~~~~~~~~~ shortcuts ~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+	def quickaccess(self):
+
+		self.toolBar = self.addToolBar("QuickAccess")
+
+		extractAction = QtWidgets.QAction(QtGui.QIcon('icons/plot5.png'),'Custom Plot',self)
+		extractAction.triggered.connect(self.customPlot)
+		self.toolBar.addAction(extractAction)
+
+		extractAction = QtWidgets.QAction(QtGui.QIcon('icons/layout3.png'),'Custom QPU',self)
+		# extractAction.triggered.connect(self.TBD)
+		self.toolBar.addAction(extractAction)
+		extractAction.setEnabled(False)
+		
+		extractAction = QtWidgets.QAction(QtGui.QIcon('icons/uc3.png'),'View Microcode',self)
+		# extractAction.triggered.connect(self.TBD)
+		self.toolBar.addAction(extractAction)
+		extractAction.setEnabled(False)
+
+	def customPlot(self):
+		return
 
 	#~~~~~~~~~~~~~~~~~~~~~~~~~ openql ed ~~~~~~~~~~~~~~~~~~~~~~~~~#
 
