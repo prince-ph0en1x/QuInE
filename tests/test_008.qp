@@ -1,3 +1,5 @@
 {
-  "name": "/media/sf_QWorld/QuInE/tests/test_008.qp"
+  "name": "/media/sf_QWorld/QuInE/tests/test_008.qp",
+  "dir": "/media/sf_QWorld/QuInE/tests",
+  "name_cqasm": "/media/sf_QWorld/QuInE/tests/sample/sample.qasm"
 }
