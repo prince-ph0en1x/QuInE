@@ -1,4 +1,4 @@
-# Test project
+# Test project and open qasm
 
 # TBD
 '''
@@ -10,6 +10,7 @@ import sys
 from PyQt5 import QtWidgets, QtGui, QtCore
 
 import os
+import json
 
 # PATH_QX = '/media/sf_QWorld/dev_tools_QCA/qx-simulator-bug-ckt-accumulation-qxelerator-72/build/bin/qx-simulator'
 test_path = os.path.dirname(os.path.realpath(__file__))						# Get the path of this python code file
@@ -75,25 +76,31 @@ class Window(QtWidgets.QMainWindow):
 		self.menuFileOpenProj.triggered.connect(self.openProject)
 		self.menuFile.addAction(self.menuFileOpenProj)
 
-		self.menuFileSaveP = QtWidgets.QAction("&Save Project",self)
-		self.menuFileSaveP.setShortcut("Ctrl+S")
-		# self.menuFileSaveP.triggered.connect(self.saveProject)
-		self.menuFile.addAction(self.menuFileSaveP)
-		self.menuFileSaveP.setEnabled(False)
+		self.menuFileSaveProj = QtWidgets.QAction("&Save Project",self)
+		self.menuFileSaveProj.setShortcut("Ctrl+S")
+		self.menuFileSaveProj.triggered.connect(self.saveProject)
+		self.menuFile.addAction(self.menuFileSaveProj)
+		self.menuFileSaveProj.setEnabled(False)
+
+		self.menuFileCloseProj = QtWidgets.QAction("&Close Project",self)
+		# self.menuFileSaveP.setShortcut("Ctrl+X")
+		self.menuFileCloseProj.triggered.connect(self.closeProject)
+		self.menuFile.addAction(self.menuFileCloseProj)
+		self.menuFileCloseProj.setEnabled(False)
 
 		self.menuFile.addSeparator()
 
-		self.menuFileOpenO = QtWidgets.QAction("&Import OpenQL",self)
+		self.menuFileOpenO = QtWidgets.QAction("&Set OpenQL",self)
 		# self.menuFileOpenO.triggered.connect(self.importOpenql)
 		self.menuFile.addAction(self.menuFileOpenO)
 		self.menuFileOpenO.setEnabled(False)
 
-		self.menuFileOpenQ = QtWidgets.QAction("&Import QASM",self)
-		# self.menuFileOpenQ.triggered.connect(self.importQasm)
+		self.menuFileOpenQ = QtWidgets.QAction("&Set cQASM",self)
+		self.menuFileOpenQ.triggered.connect(self.importQasm)
 		self.menuFile.addAction(self.menuFileOpenQ)
 		self.menuFileOpenQ.setEnabled(False)
 
-		self.menuFileOpenC = QtWidgets.QAction("&Import QCircuit",self)
+		self.menuFileOpenC = QtWidgets.QAction("&Set QCircuit",self)
 		# self.menuFileOpenC.triggered.connect(self.TBD)
 		self.menuFile.addAction(self.menuFileOpenC)
 		self.menuFileOpenC.setEnabled(False)
@@ -137,16 +144,55 @@ class Window(QtWidgets.QMainWindow):
 
 	def newProject(self):
 
-		self.dirProj = str(QtGui.QFileDialog.getExistingDirectory(self,'New Project Directory'))
-		self.nameProj = self.dirProj[self.dirProj.rindex('/')+1:]
-		self.configProj = {'name':self.nameProj}
-		self.configProj.update({'path':self.dirProj})
-
-		self.centerLayout()
+		self.nameProj, _ = QtWidgets.QFileDialog.getSaveFileName(self,"Create Project")
+		if self.nameProj != "":
+			self.cnfgProj = {'name':self.nameProj}
+			with open(self.nameProj,'w') as file:
+				json.dump(self.cnfgProj,file,indent=2)
+			file.close()
+		
+			self.centerLayout()
 
 	def openProject(self):
-		return
 
+		self.nameProj, _ = QtWidgets.QFileDialog.getOpenFileName(self,"Open Project")	
+		if self.nameProj != "":
+			with open(self.nameProj,'r') as file:
+				self.cnfgProj = json.load(file)
+			file.close()
+
+			# self.openOpenql()
+			# self.openQasm()
+			# self.openQcirc()
+
+			self.centerLayout()
+
+	def saveProject(self):
+
+		with open(self.nameProj,'w') as file:
+			json.dump(self.cnfgProj,file,indent=2)
+		file.close()
+
+		# self.saveOpenql()
+		# self.saveQasm()
+
+
+	def closeProject(self):
+
+		self.menuFileSaveProj.setEnabled(False)
+		self.menuFileCloseProj.setEnabled(False)
+
+		self.menuFileOpenQ.setEnabled(False)
+
+		# Remove layout
+
+	def importQasm(self):
+
+		self.nameCqasm, _ = QtWidgets.QFileDialog.getOpenFileName(self,'Import cQASM File','',"*.qasm")
+		with open(self.nameCqasm,'r') as file:
+			text = file.read()
+			self.textQasm.setText(text)
+		self.cnfgProj.update({'name_cqasm':self.nameCqasm})
 
 	#~~~~~~~~~~~~~~~~~~~~~~~~~ help menu ~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -213,6 +259,10 @@ class Window(QtWidgets.QMainWindow):
 	def centerLayout(self):
 
 		self.quickaccess()
+		self.menuFileSaveProj.setEnabled(True)
+		self.menuFileCloseProj.setEnabled(True)
+
+		self.menuFileOpenQ.setEnabled(True)
 		
 		self.centralWidget = QtWidgets.QWidget(self)
 		self.setCentralWidget(self.centralWidget)
