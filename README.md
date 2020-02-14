@@ -1,15 +1,16 @@
 # Quantum Innovation Environment
 
-![sc](/runshots/qpm.png)
-
-## Install
-
-`sudo apt-get install python3-pyqt5`
-`git clone https://github.com/prince-ph0en1x/QuInE`
+![sc](/archives/runshots/v010.png)
 
 ## Execute
 
-`python3 quine.py`
+`dist/test_010`
+
+## Develop
+
+* `sudo apt-get install python3-pyqt5`
+* `git clone https://github.com/prince-ph0en1x/QuInE`
+* `python3 quine.py`
 
 
 ## Features

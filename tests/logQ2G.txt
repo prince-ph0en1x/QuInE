@@ -9,18 +9,20 @@
      version 0.3 beta - QuTech - 2019 - report bugs and suggestions to: nader.khammassi@gmail.com
   =================================================================================================== 
 
-[+] loading circuit from '/media/sf_QWorld/QuInE/tests/sample/test_009.qasm' ...
+[+] loading circuit from '/media/sf_QWorld/QuInE/tests/test_output/test.qasm' ...
 [+] creating quantum register of 2 qubits... 
-[i] loaded 1 circuits.
+[i] loaded 2 circuits.
 [+] executing circuit 'default' (1 iter) ...
+[+] circuit execution time: 1.12e-07 sec.
+[+] executing circuit 'min_kernel' (1 iter) ...
 --------------[quantum state]-------------- 
   [p = +0.5000000]  (+0.7071068,+0.0000000) |00> +
-  [p = +0.5000000]  (+0.7071068,+0.0000000) |01> +
+  [p = +0.5000000]  (+0.7071068,+0.0000000) |11> +
 ------------------------------------------- 
 [>>] measurement averaging (ground state) :  | +0.000000 | +0.000000 |
 ------------------------------------------- 
-[>>] measurement prediction               :  |         0 |         X |
+[>>] measurement prediction               :  |         X |         X |
 ------------------------------------------- 
 [>>] measurement register                 :  |         0 |         0 |
 ------------------------------------------- 
-[+] circuit execution time: +0.001603 sec.
+[+] circuit execution time: +0.001246 sec.
